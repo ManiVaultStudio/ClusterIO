@@ -21,7 +21,7 @@ class ClusterIOPluginConan(ConanFile):
     description = """Plugins for reading and writing cluster data
                   in the high-dimensional plugin system (ManiVaultStudio)."""
     topics = ("ManiVaultStudio", "plugin", "cluster data", "loading", "writing")
-    url = "https://github.com/ManiVaultStudio/ClusterIOPlugin"
+    url = "https://github.com/ManiVaultStudio/ClusterIO"
     author = "B. van Lew b.van_lew@lumc.nl"  # conan recipe author
     license = "MIT"
 
@@ -33,7 +33,7 @@ class ClusterIOPluginConan(ConanFile):
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": True, "fPIC": True}
 
-    # Qt requirement is inherited from hdps-core
+    # Qt requirement is inherited from ManiVaultStudio core
 
     scm = {"type": "git", "subfolder": "ManiVaultStudio/ClusterIO", "url": "auto", "revision": "auto"}
 
