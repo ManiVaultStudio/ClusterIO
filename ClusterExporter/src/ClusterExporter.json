@@ -1,0 +1,6 @@
+{
+    "name" : "Cluster Exporter",
+    "menuName" : "Cluster (.bin)",
+    "version" : "1",
+    "dependencies" : ["Points", "Cluster"]
+}
