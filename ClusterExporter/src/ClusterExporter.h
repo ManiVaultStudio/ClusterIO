@@ -12,8 +12,8 @@
 
 #include <vector>
 
-using namespace hdps::plugin;
-using namespace hdps::gui;
+using namespace mv::plugin;
+using namespace mv::gui;
 
 struct DataContent {
     DataContent() : numClusters(0), clusterSizes{}, clusterNames{}, clusterIDs{}, clusterColors {}, clusterIndices{}, parentName(""), parentNumPoints(0) {};
@@ -82,7 +82,7 @@ private:
      *
      * \param dataSetName Data set name to request from core
     */
-    DataContent retrieveDataSetContent(hdps::Dataset<Clusters>& dataSet);
+    DataContent retrieveDataSetContent(mv::Dataset<Clusters>& dataSet);
 
     void writeClusterDataToBinary(const QString& writePath, const DataContent& dataContent);
 
@@ -97,7 +97,7 @@ private:
 
 class ClusterExporterFactory : public WriterPluginFactory
 {
-    Q_INTERFACES(hdps::plugin::WriterPluginFactory hdps::plugin::PluginFactory)
+    Q_INTERFACES(mv::plugin::WriterPluginFactory mv::plugin::PluginFactory)
         Q_OBJECT
         Q_PLUGIN_METADATA(IID   "nl.tudelft.ClusterExporter"
             FILE  "ClusterExporter.json")
@@ -115,12 +115,12 @@ public:
 
     WriterPlugin* produce() override;
 
-    hdps::DataTypes supportedDataTypes() const override;
+    mv::DataTypes supportedDataTypes() const override;
 
     /**
      * Get plugin trigger actions given \p datasets
      * @param datasets Vector of input datasets
      * @return Vector of plugin trigger actions
      */
-    PluginTriggerActions getPluginTriggerActions(const hdps::Datasets& datasets) const override;
+    PluginTriggerActions getPluginTriggerActions(const mv::Datasets& datasets) const override;
 };

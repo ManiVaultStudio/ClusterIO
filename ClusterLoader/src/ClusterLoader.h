@@ -6,7 +6,7 @@
 
 #include <QDialog>
 
-using namespace hdps::plugin;
+using namespace mv::plugin;
 
 // =============================================================================
 // Loading input box
@@ -37,15 +37,15 @@ public:
     }
 
     /** Get smart pointer to dataset (if any) */
-    hdps::Dataset<hdps::DatasetImpl> getSourceDataset() {
+    mv::Dataset<mv::DatasetImpl> getSourceDataset() {
         return _datasetPickerAction.getCurrentDataset();
     }
 
 protected:
-    hdps::gui::StringAction            _datasetNameAction;             /** Dataset name action */
-    hdps::gui::DatasetPickerAction     _datasetPickerAction;           /** Dataset picker action for picking source datasets */
-    hdps::gui::TriggerAction           _loadAction;                    /** Load action */
-    hdps::gui::GroupAction             _groupAction;                   /** Group action */
+    mv::gui::StringAction            _datasetNameAction;             /** Dataset name action */
+    mv::gui::DatasetPickerAction     _datasetPickerAction;           /** Dataset picker action for picking source datasets */
+    mv::gui::TriggerAction           _loadAction;                    /** Load action */
+    mv::gui::GroupAction             _groupAction;                   /** Group action */
 };
 
 // =============================================================================
@@ -71,7 +71,7 @@ public:
 
 class ClusterLoaderFactory : public LoaderPluginFactory
 {
-    Q_INTERFACES(hdps::plugin::LoaderPluginFactory hdps::plugin::PluginFactory)
+    Q_INTERFACES(mv::plugin::LoaderPluginFactory mv::plugin::PluginFactory)
     Q_OBJECT
     Q_PLUGIN_METADATA(IID   "nl.tudelft.ClusterLoader"
                       FILE  "ClusterLoader.json")
@@ -89,5 +89,5 @@ public:
 
     LoaderPlugin* produce() override;
 
-    hdps::DataTypes supportedDataTypes() const override;
+    mv::DataTypes supportedDataTypes() const override;
 };

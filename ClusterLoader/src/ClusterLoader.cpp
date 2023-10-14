@@ -11,8 +11,8 @@
 
 Q_PLUGIN_METADATA(IID "nl.tudelft.ClusterLoader")
 
-using namespace hdps;
-using namespace hdps::gui;
+using namespace mv;
+using namespace mv::gui;
 
 // Same as in Cluster Exporter
 struct DataContent {
@@ -197,7 +197,7 @@ ClusterLoadingInputDialog::ClusterLoadingInputDialog(QWidget* parent, ClusterLoa
     // Update the state of the dataset picker
     const auto updateDatasetPicker = [this]() -> void {
         // Get unique identifier and gui names from all point data sets in the core
-        auto dataSets = hdps::Application::core()->requestAllDataSets(QVector<hdps::DataType> {PointType});
+        auto dataSets = mv::Application::core()->requestAllDataSets(QVector<mv::DataType> {PointType});
 
         // Assign found dataset(s)
         _datasetPickerAction.setDatasets(dataSets);
@@ -209,7 +209,7 @@ ClusterLoadingInputDialog::ClusterLoadingInputDialog(QWidget* parent, ClusterLoa
         });
 
     // Enable load once a parent data set was chosen
-    connect(&_datasetPickerAction, &DatasetPickerAction::datasetPicked, this, [this](hdps::Dataset<hdps::DatasetImpl> pickedDataset) {
+    connect(&_datasetPickerAction, &DatasetPickerAction::datasetPicked, this, [this](mv::Dataset<mv::DatasetImpl> pickedDataset) {
         _loadAction.setEnabled(true);
         });
 

@@ -14,8 +14,8 @@
 
 Q_PLUGIN_METADATA(IID "nl.tudelft.ClusterExporter")
 
-using namespace hdps;
-using namespace hdps::gui;
+using namespace mv;
+using namespace mv::gui;
 
 ClusterExporter::ClusterExporter(const PluginFactory* factory) :
     WriterPlugin(factory)
@@ -75,7 +75,7 @@ void ClusterExporter::writeData()
     }
 }
 
-DataContent ClusterExporter::retrieveDataSetContent(hdps::Dataset<Clusters>& dataSet) {
+DataContent ClusterExporter::retrieveDataSetContent(mv::Dataset<Clusters>& dataSet) {
     DataContent dataContent;
 
     dataContent.numClusters = dataSet->getClusters().size();
@@ -186,7 +186,7 @@ DataTypes ClusterExporterFactory::supportedDataTypes() const
     return supportedTypes;
 }
 
-PluginTriggerActions ClusterExporterFactory::getPluginTriggerActions(const hdps::Datasets& datasets) const
+PluginTriggerActions ClusterExporterFactory::getPluginTriggerActions(const mv::Datasets& datasets) const
 {
     PluginTriggerActions pluginTriggerActions;
 
