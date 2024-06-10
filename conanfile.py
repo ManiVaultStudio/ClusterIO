@@ -19,16 +19,16 @@ class ClusterIOPluginConan(ConanFile):
     """Class to package ClusterIOPlugin using conan
 
     Packages both RELEASE and DEBUG.
-    Uses rules_support (github.com/ManivaultStudio/rulessupport) to derive
+    Uses rules_support (github.com/ManiVaultStudio/rulessupport) to derive
     versioninfo based on the branch naming convention
-    as described in https://github.com/ManivaultStudio/core/wiki/Branch-naming-rules
+    as described in https://github.com/ManiVaultStudio/core/wiki/Branch-naming-rules
     """
 
     name = "ClusterIOPlugin"
     description = """Plugins for reading and writing cluster data
-                  in the ManiVault."""
-    topics = ("ManivaultStudio", "plugin", "cluster data", "loading", "writing")
-    url = "https://github.com/ManivaultStudio/ClusterIO"
+                  in the high-dimensional plugin system (ManiVaultStudio)."""
+    topics = ("ManiVaultStudio", "plugin", "cluster data", "loading", "writing")
+    url = "https://github.com/ManiVaultStudio/ClusterIO"
     author = "B. van Lew b.van_lew@lumc.nl"  # conan recipe author
     license = "MIT"
 
@@ -40,9 +40,9 @@ class ClusterIOPluginConan(ConanFile):
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": True, "fPIC": True}
 
-    # Qt requirement is inherited from ManivaultStudio-core
+    # Qt requirement is inherited from ManiVaultStudio core
 
-    scm = {"type": "git", "subfolder": "hdps/ClusterIO", "url": "auto", "revision": "auto"}
+    scm = {"type": "git", "subfolder": "ManiVaultStudio/ClusterIO", "url": "auto", "revision": "auto"}
 
     def __get_git_path(self):
         path = load(
@@ -111,14 +111,14 @@ class ClusterIOPluginConan(ConanFile):
 
     def _configure_cmake(self):
         cmake = CMake(self)
-        cmake.configure(build_script_folder="hdps/ClusterIO")
+        cmake.configure(build_script_folder="ManiVaultStudio/ClusterIO")
         cmake.verbose = True
         return cmake
 
     def build(self):
         print("Build OS is : ", self.settings.os)
 
-        # The ClusterIO plugins expect the HDPS package to be in this install dir
+        # The ClusterIO plugins expect the ManiVaultStudio package to be in this install dir
         hdps_pkg_root = self.deps_cpp_info["hdps-core"].rootpath
         print("Install dir type: ", self.install_dir)
         shutil.copytree(hdps_pkg_root, self.install_dir)
