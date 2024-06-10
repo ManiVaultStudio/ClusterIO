@@ -15,8 +15,8 @@ Num data points (source/parent): 234
 
 Binary layout:
 ```
-Numer of parent dataset points (uint32_t)
 Number of clusters (uint32_t)
+Numer of parent dataset points (uint32_t)
 Size of cluster sizes (size_t), cluster sizes (uint32_t)
 Bool whether this entry exists, size of cluster colors (size_t), parent cluster colors (int32_t)
 Size of cluster indices (size_t), cluster indices (uint32_t)
