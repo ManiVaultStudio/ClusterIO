@@ -35,42 +35,48 @@ void ClusterLoader::loadData()
     if (fileName.isNull() || fileName.isEmpty())
         return;
 
-    std::cout << "Loading Cluster file: " << fileName.toStdString() << std::endl;
-
-    // read in binary data, be sure to read in the same other as ClusterExporter::writeClusterDataToBinary wrote them
-    utils::DataContent dataContent;
-    std::ifstream in(fileName.toStdString(), std::ios::in | std::ios::binary);
-    if (in)
-    {
-        in.seekg(0, std::ios::beg);
-        
-        utils::readNum(dataContent.numClusters, in);
-        utils::readNum(dataContent.parentNumPoints, in);
-        utils::readVec(dataContent.clusterSizes, in);
-        utils::readVec(dataContent.clusterColors, in);
-        utils::readVec(dataContent.clusterIndices, in);
-        utils::readVecOfStrings(dataContent.clusterNames, in);
-        utils::readVecOfStrings(dataContent.clusterIDs, in);
-        utils::readString(dataContent.parentName, in);
-
-        in.close();
-    }
-    else
-    {
-        throw DataLoadException(fileName, "File was not found at location.");
-    }
-
-    assert(dataContent.numClusters == dataContent.clusterNames.size());
-    assert(dataContent.numClusters == dataContent.clusterSizes.size());
-    assert(dataContent.clusterColors.size() == dataContent.numClusters * 3);
-
     ClusterLoadingInputDialog inputDialog(nullptr, *this, QFileInfo(fileName).baseName());
 
     // open dialog and wait for user input
     int ok = inputDialog.exec();
 
     if (ok == QDialog::Accepted && !inputDialog.getDatasetName().isEmpty()) {
-    
+
+        std::cout << "Loading Cluster file: " << fileName.toStdString() << std::endl;
+
+        bool readColors = false;
+
+        // read in binary data, be sure to read in the same other as ClusterExporter::writeClusterDataToBinary wrote them
+        utils::DataContent dataContent;
+        std::ifstream in(fileName.toStdString(), std::ios::in | std::ios::binary);
+        if (in)
+        {
+            in.seekg(0, std::ios::beg);
+
+            utils::readVal(dataContent.numClusters, in);
+            utils::readVal(dataContent.parentNumPoints, in);
+            utils::readVec(dataContent.clusterSizes, in);
+
+            utils::readVal(readColors, in);
+            if (readColors)
+                utils::readVec(dataContent.clusterColors, in);
+
+            utils::readVec(dataContent.clusterIndices, in);
+            utils::readVecOfStrings(dataContent.clusterNames, in);
+
+            utils::readString(dataContent.parentName, in);
+
+            in.close();
+        }
+        else
+        {
+            throw DataLoadException(fileName, "File was not found at location.");
+        }
+
+        assert(dataContent.numClusters == dataContent.clusterNames.size());
+        assert(dataContent.numClusters == dataContent.clusterSizes.size());
+        assert(!readColors || dataContent.clusterColors.size() == dataContent.numClusters * 3);
+
         auto sourceDataset = inputDialog.getSourceDataset();
 
         if (!sourceDataset.isValid())
@@ -102,13 +108,15 @@ void ClusterLoader::loadData()
             Cluster cluster;
 
             cluster.setName(QString::fromStdString(dataContent.clusterNames[i]));
-            cluster.setId(QString::fromStdString(dataContent.clusterIDs[i]));
-
-            QColor color = { dataContent.clusterColors[i * 3], dataContent.clusterColors[i * 3 + 1] , dataContent.clusterColors[i * 3 + 2] };
-            cluster.setColor(color);
 
             cluster.getIndices() = std::vector<std::uint32_t>(dataContent.clusterIndices.begin() + globalIndicesOffset, dataContent.clusterIndices.begin() + globalIndicesOffset + dataContent.clusterSizes[i]);
             globalIndicesOffset += dataContent.clusterSizes[i];
+            
+            if (readColors)
+            {
+                QColor color = { dataContent.clusterColors[i * 3], dataContent.clusterColors[i * 3 + 1] , dataContent.clusterColors[i * 3 + 2] };
+                cluster.setColor(color);
+            }
 
             clusterData->addCluster(cluster);
         }

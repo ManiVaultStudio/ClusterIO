@@ -68,8 +68,8 @@ void ClusterExporter::writeData()
 
             // get data from core
             utils::DataContent dataContent = retrieveDataSetContent(inputDataset);
-            writeClusterDataToBinary(fileName, dataContent);
-            writeInfoTextForBinary(fileName, dataContent);
+            writeClusterDataToBinary(fileName, dataContent, inputDialog.saveColors());
+            writeInfoTextForBinary(fileName, dataContent, inputDialog.saveColors());
             std::cout << "ClusterExporter: Data written to disk - File name: " << fileName.toStdString() << std::endl;
             return;
         }
@@ -93,7 +93,6 @@ utils::DataContent ClusterExporter::retrieveDataSetContent(mv::Dataset<Clusters>
     {
         dataContent.clusterIndices.insert(dataContent.clusterIndices.end(), cluster.getIndices().begin(), cluster.getIndices().end());
         dataContent.clusterNames.emplace_back(cluster.getName().toStdString());
-        dataContent.clusterIDs.emplace_back(cluster.getId().toStdString());
         dataContent.clusterSizes.emplace_back(cluster.getNumberOfIndices());
 
         auto color = cluster.getColor();
@@ -109,23 +108,27 @@ utils::DataContent ClusterExporter::retrieveDataSetContent(mv::Dataset<Clusters>
     return dataContent;
 }
 
-void ClusterExporter::writeClusterDataToBinary(const QString& writePath, const utils::DataContent& dataContent)
+void ClusterExporter::writeClusterDataToBinary(const QString& writePath, const utils::DataContent& dataContent, bool saveColors)
 {
     std::ofstream fout(writePath.toStdString(), std::ofstream::out | std::ofstream::binary);
 
-    utils::writeNum(dataContent.numClusters, fout);
-    utils::writeNum(dataContent.parentNumPoints, fout);
+    utils::writeVal(dataContent.numClusters, fout);
+    utils::writeVal(dataContent.parentNumPoints, fout);
     utils::writeVec(dataContent.clusterSizes, fout);
-    utils::writeVec(dataContent.clusterColors, fout);
+
+    utils::writeVal(saveColors, fout);
+    if (saveColors)
+        utils::writeVec(dataContent.clusterColors, fout);
+
     utils::writeVec(dataContent.clusterIndices, fout);
     utils::writeVecOfStrings(dataContent.clusterNames, fout);
-    utils::writeVecOfStrings(dataContent.clusterIDs, fout);
+
     utils::writeString(dataContent.parentName, fout);
 
     fout.close();
 }
 
-void ClusterExporter::writeInfoTextForBinary(const QString& writePath, const utils::DataContent& dataContent) {
+void ClusterExporter::writeInfoTextForBinary(const QString& writePath, const utils::DataContent& dataContent, bool saveColors) {
     std::string infoText;
     std::string fileName = QFileInfo(writePath).fileName().toStdString();
 
@@ -133,6 +136,9 @@ void ClusterExporter::writeInfoTextForBinary(const QString& writePath, const uti
     infoText += "Num clusters: " + std::to_string(dataContent.numClusters) + "\n";
     infoText += "Source data: " + dataContent.parentName + "\n";
     infoText += "Num data points (source): " + std::to_string(dataContent.parentNumPoints) + "\n";
+
+    std::string saveColorsString = saveColors ? "True" : "False";
+    infoText += "Contains colors per clusters: " + saveColorsString + "\n";
 
     std::ofstream fout(writePath.section(".", 0, 0).toStdString() + ".txt");
     fout << infoText;

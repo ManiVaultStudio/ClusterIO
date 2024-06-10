@@ -9,7 +9,6 @@ namespace utils {
         uint32_t numClusters = 0;
         std::vector<uint32_t> clusterSizes = {};
         std::vector<std::string> clusterNames = {};
-        std::vector<std::string> clusterIDs = {};
         std::vector<int32_t> clusterColors = {};
         std::vector<uint32_t> clusterIndices = {};
 
@@ -18,13 +17,13 @@ namespace utils {
     };
 
     template <typename T>
-    void readNum(T& num, std::ifstream& in)
+    void readVal(T& num, std::ifstream& in)
     {
         in.read(reinterpret_cast<char*>(&num), sizeof(T));
     }
 
     template <typename T>
-    void writeNum(const T& num, std::ofstream& fout)
+    void writeVal(const T& num, std::ofstream& fout)
     {
         fout.write(reinterpret_cast<const char*>(&num), sizeof(T));
     }
