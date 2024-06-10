@@ -11,6 +11,7 @@
 #include <QSettings>
 
 #include <fstream>
+#include <iostream>
 
 Q_PLUGIN_METADATA(IID "manivault.studio.ClusterExporter")
 
@@ -52,12 +53,12 @@ void ClusterExporter::writeData()
         // Only continue when the dialog has not been not canceled and the file name is non-empty.
         if (fileName.isNull() || fileName.isEmpty())
         {
-            qDebug() << "ClusterExporter: No data written to disk - File name empty";
+            std::cout << "ClusterExporter: No data written to disk - File name empty" << std::endl;
             return;
         }
         else if (inputDataset->getParent().getDataset()->getDataType() != PointType)
         {
-            qDebug() << "ClusterExporter: Parent of selected dataset must be points data - Doing nothing";
+            std::cout << "ClusterExporter: Parent of selected dataset must be points data - Doing nothing" << std::endl;
             return;
         }
         else
@@ -69,13 +70,13 @@ void ClusterExporter::writeData()
             utils::DataContent dataContent = retrieveDataSetContent(inputDataset);
             writeClusterDataToBinary(fileName, dataContent);
             writeInfoTextForBinary(fileName, dataContent);
-            qDebug() << "ClusterExporter: Data written to disk - File name: " << fileName;
+            std::cout << "ClusterExporter: Data written to disk - File name: " << fileName.toStdString() << std::endl;
             return;
         }
     }
     else
     {
-        qDebug() << "ClusterExporter: No data written to disk - No data set selected";
+        std::cout << "ClusterExporter: No data written to disk - No data set selected" << std::endl;
         return;
     }
 }
