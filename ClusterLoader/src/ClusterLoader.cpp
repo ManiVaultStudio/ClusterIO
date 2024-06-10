@@ -1,34 +1,18 @@
 #include "ClusterLoader.h"
 
-#include <PointData/PointData.h>
+#include "ClusterUtils.h"
+
 #include <ClusterData/ClusterData.h>
+#include <PointData/PointData.h>
 
 #include <QInputDialog>
 
-#include <fstream>
-#include <iterator>
 #include <vector>
 
-Q_PLUGIN_METADATA(IID "nl.tudelft.ClusterLoader")
+Q_PLUGIN_METADATA(IID "manivault.studio.ClusterLoader")
 
 using namespace mv;
 using namespace mv::gui;
-
-// Same as in Cluster Exporter
-struct DataContent {
-    DataContent() : numClusters(0), clusterSizes{}, clusterNames{}, clusterIDs{}, clusterColors{}, clusterIndices{}, parentName(""), parentNumPoints(0) {};
-
-    uint32_t numClusters;
-    std::vector<uint32_t> clusterSizes;
-    std::vector<std::string> clusterNames;
-    std::vector<std::string> clusterIDs;
-    std::vector<int32_t> clusterColors;
-    std::vector<uint32_t> clusterIndices;
-
-    std::string parentName;
-    uint32_t parentNumPoints;
-};
-
 
 // =============================================================================
 // View
@@ -36,25 +20,11 @@ struct DataContent {
 
 ClusterLoader::~ClusterLoader(void)
 {
-
 }
 
 void ClusterLoader::init()
 {
-
 }
-
-template <typename T>
-void readVec(std::vector<T>& vec, std::ifstream& in)
-{
-    size_t length;
-    in.read(reinterpret_cast<char*>(&length), sizeof(size_t));
-    vec.resize(length);
-    for (size_t i = 0; i < length; i++)
-        in.read(reinterpret_cast<char*>(&vec[i]), sizeof(T));
-}
-template void readVec<int32_t>(std::vector<int32_t>& vec, std::ifstream& in);
-template void readVec<uint32_t>(std::vector<uint32_t>& vec, std::ifstream& in);
 
 void ClusterLoader::loadData()
 {
@@ -67,41 +37,20 @@ void ClusterLoader::loadData()
     qDebug() << "Loading Cluster file: " << fileName;
 
     // read in binary data, be sure to read in the same other as ClusterExporter::writeClusterDataToBinary wrote them
-    DataContent dataContent;
+    utils::DataContent dataContent;
     std::ifstream in(fileName.toStdString(), std::ios::in | std::ios::binary);
     if (in)
     {
-        auto readString = [&in](std::string& s) -> void {
-            size_t length;
-            in.read(reinterpret_cast<char*>(&length), sizeof(size_t));
-            s.resize(length);
-            in.read(&s[0], length);
-            };
-
         in.seekg(0, std::ios::beg);
         
-        in.read(reinterpret_cast<char*>(&dataContent.numClusters), sizeof(uint32_t));
-
-        readString(dataContent.parentName);
-
-        in.read(reinterpret_cast<char*>(&dataContent.parentNumPoints), sizeof(uint32_t));
-
-        readVec(dataContent.clusterSizes, in);
-        readVec(dataContent.clusterColors, in);
-        readVec(dataContent.clusterIndices, in);
-
-        size_t length;
-        in.read(reinterpret_cast<char*>(&length), sizeof(size_t));
-        dataContent.clusterNames.resize(length);
-        for (size_t i = 0; i < length; i++) {
-            readString(dataContent.clusterNames[i]);
-        }
-
-        in.read(reinterpret_cast<char*>(&length), sizeof(size_t));
-        dataContent.clusterIDs.resize(length);
-        for (size_t i = 0; i < length; i++) {
-            readString(dataContent.clusterIDs[i]);
-        }
+        utils::readNum(dataContent.numClusters, in);
+        utils::readNum(dataContent.parentNumPoints, in);
+        utils::readVec(dataContent.clusterSizes, in);
+        utils::readVec(dataContent.clusterColors, in);
+        utils::readVec(dataContent.clusterIndices, in);
+        utils::readVecOfStrings(dataContent.clusterNames, in);
+        utils::readVecOfStrings(dataContent.clusterIDs, in);
+        utils::readString(dataContent.parentName, in);
 
         in.close();
     }
@@ -129,16 +78,20 @@ void ClusterLoader::loadData()
             return;
         }
 
-        auto t1 = dataContent.parentName;
-        auto t2 = inputDialog.getSourceDataset().getDataset()->text();
-
-        if (dataContent.parentName != sourceDataset.getDataset()->text().toStdString())
+        if (dataContent.parentNumPoints != mv::data().getDataset<Points>(sourceDataset.getDatasetId())->getNumPoints())
         {
-            qDebug() << "ClusterLoader: Selected parent data is not the parent of the object to be loaded";
+            qDebug() << "ClusterLoader: Selected parent has a different number of points  (" << mv::data().getDataset<Points>(sourceDataset.getDatasetId())->getNumPoints() << ") from loaded clusters (" << dataContent.parentNumPoints << ")";
             return;
         }
 
-        auto clusterData = _core->addDataset<Clusters>("Cluster", inputDialog.getDatasetName(), sourceDataset);
+        if (dataContent.parentName != sourceDataset.getDataset()->text().toStdString())
+        {
+            qDebug() << "ClusterLoader: Selected parent data is not the parent of the object to be loaded (we will continue anyways)";
+            qDebug() << "ClusterLoader: loaded parent name: " << dataContent.parentName;
+            qDebug() << "ClusterLoader: designated parent name: " << sourceDataset.getDataset()->text().toStdString();
+        }
+
+        auto clusterData = mv::data().createDataset<Clusters>("Cluster", inputDialog.getDatasetName(), sourceDataset);
         events().notifyDatasetAdded(clusterData);
 
         size_t numC = dataContent.numClusters;
@@ -197,7 +150,7 @@ ClusterLoadingInputDialog::ClusterLoadingInputDialog(QWidget* parent, ClusterLoa
     // Update the state of the dataset picker
     const auto updateDatasetPicker = [this]() -> void {
         // Get unique identifier and gui names from all point data sets in the core
-        auto dataSets = mv::Application::core()->requestAllDataSets(QVector<mv::DataType> {PointType});
+        auto dataSets = mv::data().getAllDatasets({PointType});
 
         // Assign found dataset(s)
         _datasetPickerAction.setDatasets(dataSets);

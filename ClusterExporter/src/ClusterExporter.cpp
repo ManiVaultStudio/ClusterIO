@@ -4,15 +4,15 @@
 
 #include <PointData/PointData.h>
 
+#include <DataHierarchyItem.h>
+
 #include <QFileDialog>
-#include <QSettings>
 #include <QFileInfo>
+#include <QSettings>
 
 #include <fstream>
-#include <iterator>
-#include <algorithm>
 
-Q_PLUGIN_METADATA(IID "nl.tudelft.ClusterExporter")
+Q_PLUGIN_METADATA(IID "manivault.studio.ClusterExporter")
 
 using namespace mv;
 using namespace mv::gui;
@@ -55,13 +55,18 @@ void ClusterExporter::writeData()
             qDebug() << "ClusterExporter: No data written to disk - File name empty";
             return;
         }
+        else if (inputDataset->getParent().getDataset()->getDataType() != PointType)
+        {
+            qDebug() << "ClusterExporter: Parent of selected dataset must be points data - Doing nothing";
+            return;
+        }
         else
         {
             // store the directory name
             settings.setValue(directoryPathKey, QFileInfo(fileName).absolutePath());
 
             // get data from core
-            DataContent dataContent = retrieveDataSetContent(inputDataset);
+            utils::DataContent dataContent = retrieveDataSetContent(inputDataset);
             writeClusterDataToBinary(fileName, dataContent);
             writeInfoTextForBinary(fileName, dataContent);
             qDebug() << "ClusterExporter: Data written to disk - File name: " << fileName;
@@ -75,8 +80,8 @@ void ClusterExporter::writeData()
     }
 }
 
-DataContent ClusterExporter::retrieveDataSetContent(mv::Dataset<Clusters>& dataSet) {
-    DataContent dataContent;
+utils::DataContent ClusterExporter::retrieveDataSetContent(mv::Dataset<Clusters>& dataSet) {
+    utils::DataContent dataContent;
 
     dataContent.numClusters = dataSet->getClusters().size();
 
@@ -95,70 +100,38 @@ DataContent ClusterExporter::retrieveDataSetContent(mv::Dataset<Clusters>& dataS
         dataContent.clusterColors.insert(dataContent.clusterColors.end(), colorVec.begin(), colorVec.end());
     }
 
-    const auto parent = dataSet->getParent().getDataset();
+    dataContent.parentName = dataSet->getParent().getDataset()->getGuiName().toStdString();
 
-    dataContent.parentName = parent->getGuiName().toStdString();
-
-    if(parent->getDataType() == PointType)
-        dataContent.parentNumPoints= dataSet->getDataHierarchyItem().getParent().getDataset<Points>()->getNumPoints();
+    // assumes that the parent data is point data
+    dataContent.parentNumPoints = dataSet->getDataHierarchyItem().getParent()->getDataset<Points>()->getNumPoints();
 
     return dataContent;
 }
 
-template <typename T>
-void writeVec(const std::vector<T>& vec, std::ofstream& fout)
-{
-    size_t length = vec.size();
-    fout.write(reinterpret_cast<const char*>(&length), sizeof(size_t));
-    fout.write(reinterpret_cast<const char*>(vec.data()), length * sizeof(T));
-}
-template void writeVec<int32_t>(const std::vector<int32_t>& vec, std::ofstream& fout);
-template void writeVec<uint32_t>(const std::vector<uint32_t>& vec, std::ofstream& fout);
-
-void ClusterExporter::writeClusterDataToBinary(const QString& writePath, const DataContent& dataContent)
+void ClusterExporter::writeClusterDataToBinary(const QString& writePath, const utils::DataContent& dataContent)
 {
     std::ofstream fout(writePath.toStdString(), std::ofstream::out | std::ofstream::binary);
 
-    auto writeString = [&fout](const std::string& s) -> void {
-        size_t length = s.size();
-        fout.write(reinterpret_cast<const char*>(&length), sizeof(size_t));
-        fout.write(reinterpret_cast<const char*>(s.c_str()), length);
-        };
-
-    fout.write(reinterpret_cast<const char*>(&dataContent.numClusters), sizeof(uint32_t));
-
-    writeString(dataContent.parentName);
-
-    fout.write(reinterpret_cast<const char*>(&dataContent.parentNumPoints), sizeof(uint32_t));
-
-    writeVec(dataContent.clusterSizes, fout);
-    writeVec(dataContent.clusterColors, fout);
-    writeVec(dataContent.clusterIndices, fout);
-
-    size_t length = dataContent.clusterNames.size();
-    fout.write(reinterpret_cast<const char*>(&length), sizeof(size_t));
-    for (const std::string& clusterName : dataContent.clusterNames) {
-        writeString(clusterName);
-    }
-
-    length = dataContent.clusterIDs.size();
-    fout.write(reinterpret_cast<const char*>(&length), sizeof(size_t));
-    for (const std::string& clusterID : dataContent.clusterIDs) {
-        writeString(clusterID);
-    }
+    utils::writeNum(dataContent.numClusters, fout);
+    utils::writeNum(dataContent.parentNumPoints, fout);
+    utils::writeVec(dataContent.clusterSizes, fout);
+    utils::writeVec(dataContent.clusterColors, fout);
+    utils::writeVec(dataContent.clusterIndices, fout);
+    utils::writeVecOfStrings(dataContent.clusterNames, fout);
+    utils::writeVecOfStrings(dataContent.clusterIDs, fout);
+    utils::writeString(dataContent.parentName, fout);
 
     fout.close();
 }
 
-void ClusterExporter::writeInfoTextForBinary(const QString& writePath, const DataContent& dataContent) {
+void ClusterExporter::writeInfoTextForBinary(const QString& writePath, const utils::DataContent& dataContent) {
     std::string infoText;
     std::string fileName = QFileInfo(writePath).fileName().toStdString();
 
     infoText += fileName + "\n";
     infoText += "Num clusters: " + std::to_string(dataContent.numClusters) + "\n";
     infoText += "Source data: " + dataContent.parentName + "\n";
-    if(dataContent.parentNumPoints != 0)
-        infoText += "Num data points (source): " + std::to_string(dataContent.parentNumPoints) + "\n";
+    infoText += "Num data points (source): " + std::to_string(dataContent.parentNumPoints) + "\n";
 
     std::ofstream fout(writePath.section(".", 0, 0).toStdString() + ".txt");
     fout << infoText;
@@ -197,7 +170,7 @@ PluginTriggerActions ClusterExporterFactory::getPluginTriggerActions(const mv::D
     if (PluginFactory::areAllDatasetsOfTheSameType(datasets, ClusterType)) {
         if (datasets.count() >= 1) {
             auto pluginTriggerAction = new PluginTriggerAction(const_cast<ClusterExporterFactory*>(this), this, "ClusterExporter", "Export cluster to binary file", getIcon(), [this, getPluginInstance, datasets](PluginTriggerAction& pluginTriggerAction) -> void {
-                for (auto dataset : datasets)
+                for (const auto& dataset : datasets)
                     getPluginInstance(dataset);
             });
 

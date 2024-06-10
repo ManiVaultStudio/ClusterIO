@@ -4,30 +4,16 @@
 
 #include <ClusterData/ClusterData.h>
 
+#include "ClusterUtils.h"
+
+#include <QColor>
 #include <QDialog>
-#include <QTextLine>
 #include <QHBoxLayout>
 #include <QPushButton>
-#include <QColor>
-
-#include <vector>
+#include <QTextLine>
 
 using namespace mv::plugin;
 using namespace mv::gui;
-
-struct DataContent {
-    DataContent() : numClusters(0), clusterSizes{}, clusterNames{}, clusterIDs{}, clusterColors {}, clusterIndices{}, parentName(""), parentNumPoints(0) {};
-
-    uint32_t numClusters;
-    std::vector<uint32_t> clusterSizes;
-    std::vector<std::string> clusterNames;
-    std::vector<std::string> clusterIDs;
-    std::vector<int32_t> clusterColors;
-    std::vector<uint32_t> clusterIndices;
-
-    std::string parentName;
-    uint32_t parentNumPoints;
-};
 
 // =============================================================================
 // Loading input box
@@ -63,7 +49,7 @@ private:
 };
 
 // =============================================================================
-// View
+// ClusterExporter WriterPlugin
 // =============================================================================
 
 class ClusterExporter : public WriterPlugin
@@ -82,11 +68,11 @@ private:
      *
      * \param dataSetName Data set name to request from core
     */
-    DataContent retrieveDataSetContent(mv::Dataset<Clusters>& dataSet);
+    utils::DataContent retrieveDataSetContent(mv::Dataset<Clusters>& dataSet);
 
-    void writeClusterDataToBinary(const QString& writePath, const DataContent& dataContent);
+    void writeClusterDataToBinary(const QString& writePath, const utils::DataContent& dataContent);
 
-    void writeInfoTextForBinary(const QString& writePath, const DataContent& dataContent);
+    void writeInfoTextForBinary(const QString& writePath, const utils::DataContent& dataContent);
 
 };
 
@@ -99,7 +85,7 @@ class ClusterExporterFactory : public WriterPluginFactory
 {
     Q_INTERFACES(mv::plugin::WriterPluginFactory mv::plugin::PluginFactory)
         Q_OBJECT
-        Q_PLUGIN_METADATA(IID   "nl.tudelft.ClusterExporter"
+        Q_PLUGIN_METADATA(IID   "manivault.studio.ClusterExporter"
             FILE  "ClusterExporter.json")
 
 public:

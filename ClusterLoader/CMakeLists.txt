@@ -21,17 +21,16 @@ set(CLUSTERLOADER_SOURCES
     src/ClusterLoader.json
 )
 
-set(PLUGIN_MOC_HEADERS
-    src/ClusterLoader.h
+set(COMMON_SOURCES
+    ../Common/ClusterUtils.h
 )
 
 source_group(Plugin FILES ${CLUSTERLOADER_SOURCES})
+source_group(Common FILES ${COMMON_SOURCES})
 
-add_library(${CLUSTERLOADER} SHARED ${CLUSTERLOADER_SOURCES})
+add_library(${CLUSTERLOADER} SHARED ${CLUSTERLOADER_SOURCES} ${COMMON_SOURCES})
 
-qt_wrap_cpp(CLUSTERLOADER_MOC ${PLUGIN_MOC_HEADERS} TARGET ${CLUSTERLOADER})
-target_sources(${CLUSTERLOADER} PRIVATE ${CLUSTERLOADER_MOC})
-
+target_include_directories(${CLUSTERLOADER} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../Common/")
 target_include_directories(${CLUSTERLOADER} PRIVATE "${MV_INSTALL_DIR}/$<CONFIGURATION>/include/")
 
 target_compile_features(${CLUSTERLOADER} PRIVATE cxx_std_17)
@@ -51,8 +50,8 @@ target_link_libraries(${CLUSTERLOADER} PRIVATE "${POINTDATA_LINK_LIBRARY}")
 target_link_libraries(${CLUSTERLOADER} PRIVATE "${CLUSTERDATA_LINK_LIBRARY}")
 
 install(TARGETS ${CLUSTERLOADER}
-    RUNTIME DESTINATION Plugins COMPONENT PLUGINS # Windows .dll
-    LIBRARY DESTINATION Plugins COMPONENT PLUGINS # Linux/Mac .so
+    RUNTIME DESTINATION Plugins COMPONENT PLUGIN # Windows .dll
+    LIBRARY DESTINATION Plugins COMPONENT PLUGIN # Linux/Mac .so
 )
 
 add_custom_command(TARGET ${CLUSTERLOADER} POST_BUILD
@@ -60,6 +59,7 @@ add_custom_command(TARGET ${CLUSTERLOADER} POST_BUILD
     COMMAND "${CMAKE_COMMAND}"
         --install ${CMAKE_CURRENT_BINARY_DIR}
         --config $<CONFIGURATION>
+        --component PLUGIN
         --prefix ${MV_INSTALL_DIR}/$<CONFIGURATION>
 )
 

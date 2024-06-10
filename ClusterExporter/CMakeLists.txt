@@ -21,17 +21,16 @@ set(CLUSTEREXPORTER_SOURCES
     src/ClusterExporter.json
 )
 
-set(PLUGIN_MOC_HEADERS
-    src/ClusterExporter.h
+set(COMMON_SOURCES
+    ../Common/ClusterUtils.h
 )
 
 source_group(Plugin FILES ${CLUSTEREXPORTER_SOURCES})
+source_group(Common FILES ${COMMON_SOURCES})
 
-add_library(${CLUSTEREXPORTER} SHARED ${CLUSTEREXPORTER_SOURCES})
+add_library(${CLUSTEREXPORTER} SHARED ${CLUSTEREXPORTER_SOURCES} ${COMMON_SOURCES})
 
-qt_wrap_cpp(CLUSTEREXPORTER_MOC ${PLUGIN_MOC_HEADERS} TARGET ${CLUSTEREXPORTER})
-target_sources(${CLUSTEREXPORTER} PRIVATE ${CLUSTEREXPORTER_MOC})
-
+target_include_directories(${CLUSTEREXPORTER} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../Common/")
 target_include_directories(${CLUSTEREXPORTER} PRIVATE "${MV_INSTALL_DIR}/$<CONFIGURATION>/include/")
 
 target_compile_features(${CLUSTEREXPORTER} PRIVATE cxx_std_17)
@@ -51,8 +50,8 @@ target_link_libraries(${CLUSTEREXPORTER} PRIVATE "${POINTDATA_LINK_LIBRARY}")
 target_link_libraries(${CLUSTEREXPORTER} PRIVATE "${CLUSTERDATA_LINK_LIBRARY}")
 
 install(TARGETS ${CLUSTEREXPORTER}
-    RUNTIME DESTINATION Plugins COMPONENT PLUGINS # Windows .dll
-    LIBRARY DESTINATION Plugins COMPONENT PLUGINS # Linux/Mac .so
+    RUNTIME DESTINATION Plugins COMPONENT PLUGIN # Windows .dll
+    LIBRARY DESTINATION Plugins COMPONENT PLUGIN # Linux/Mac .so
 )
 
 add_custom_command(TARGET ${CLUSTEREXPORTER} POST_BUILD
@@ -60,6 +59,7 @@ add_custom_command(TARGET ${CLUSTEREXPORTER} POST_BUILD
     COMMAND "${CMAKE_COMMAND}"
         --install ${CMAKE_CURRENT_BINARY_DIR}
         --config $<CONFIGURATION>
+        --component PLUGIN
         --prefix ${MV_INSTALL_DIR}/$<CONFIGURATION>
 )
 

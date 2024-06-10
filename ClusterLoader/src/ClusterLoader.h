@@ -6,6 +6,8 @@
 
 #include <QDialog>
 
+#include <fstream>
+
 using namespace mv::plugin;
 
 // =============================================================================
@@ -73,7 +75,7 @@ class ClusterLoaderFactory : public LoaderPluginFactory
 {
     Q_INTERFACES(mv::plugin::LoaderPluginFactory mv::plugin::PluginFactory)
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID   "nl.tudelft.ClusterLoader"
+    Q_PLUGIN_METADATA(IID   "manivault.studio.ClusterLoader"
                       FILE  "ClusterLoader.json")
 
 public:
