@@ -7,6 +7,7 @@
 
 #include <QInputDialog>
 
+#include <iostream>
 #include <vector>
 
 Q_PLUGIN_METADATA(IID "manivault.studio.ClusterLoader")
@@ -34,7 +35,7 @@ void ClusterLoader::loadData()
     if (fileName.isNull() || fileName.isEmpty())
         return;
 
-    qDebug() << "Loading Cluster file: " << fileName;
+    std::cout << "Loading Cluster file: " << fileName.toStdString() << std::endl;
 
     // read in binary data, be sure to read in the same other as ClusterExporter::writeClusterDataToBinary wrote them
     utils::DataContent dataContent;
@@ -74,21 +75,21 @@ void ClusterLoader::loadData()
 
         if (!sourceDataset.isValid())
         {
-            qDebug() << "ClusterLoader: Selected parent data set is not valid";
+            std::cout << "ClusterLoader: Selected parent data set is not valid" << std::endl;
             return;
         }
 
         if (dataContent.parentNumPoints != mv::data().getDataset<Points>(sourceDataset.getDatasetId())->getNumPoints())
         {
-            qDebug() << "ClusterLoader: Selected parent has a different number of points  (" << mv::data().getDataset<Points>(sourceDataset.getDatasetId())->getNumPoints() << ") from loaded clusters (" << dataContent.parentNumPoints << ")";
+            std::cout << "ClusterLoader: Selected parent has a different number of points  (" << mv::data().getDataset<Points>(sourceDataset.getDatasetId())->getNumPoints() << ") from loaded clusters (" << dataContent.parentNumPoints << ")" << std::endl;
             return;
         }
 
         if (dataContent.parentName != sourceDataset.getDataset()->text().toStdString())
         {
-            qDebug() << "ClusterLoader: Selected parent data is not the parent of the object to be loaded (we will continue anyways)";
-            qDebug() << "ClusterLoader: loaded parent name: " << dataContent.parentName;
-            qDebug() << "ClusterLoader: designated parent name: " << sourceDataset.getDataset()->text().toStdString();
+            std::cout << "ClusterLoader: Selected parent data is not the parent of the object to be loaded (we will continue anyways)" << std::endl;
+            std::cout << "ClusterLoader: loaded parent name: " << dataContent.parentName << std::endl;
+            std::cout << "ClusterLoader: designated parent name: " << sourceDataset.getDataset()->text().toStdString() << std::endl;
         }
 
         auto clusterData = mv::data().createDataset<Clusters>("Cluster", inputDialog.getDatasetName(), sourceDataset);
@@ -114,7 +115,7 @@ void ClusterLoader::loadData()
         
         events().notifyDatasetDataChanged(clusterData);
 
-        qDebug() << "Number of loaded clusters: " << clusterData->getClusters().size();
+        std::cout << "Number of loaded clusters: " << clusterData->getClusters().size() << std::endl;
 
     }
 
