@@ -1,34 +1,28 @@
-#include "ClusterLoader.h"
+#include "ClusterLoaderJson.h"
 
-#include "ClusterUtils.h"
 
 #include <ClusterData/ClusterData.h>
 #include <PointData/PointData.h>
 
-#include <QInputDialog>
-
 #include <iostream>
-#include <vector>
 
-Q_PLUGIN_METADATA(IID "manivault.studio.ClusterLoader")
+Q_PLUGIN_METADATA(IID "manivault.studio.ClusterLoaderJson")
 
 using namespace mv;
 using namespace mv::gui;
 
-// =============================================================================
-// View
-// =============================================================================
-
-ClusterLoader::~ClusterLoader(void)
+ClusterLoaderJson::ClusterLoaderJson(const PluginFactory* factory) :
+	LoaderPlugin(factory)
 {
 }
 
-void ClusterLoader::init()
+void ClusterLoaderJson::init()
 {
 }
 
-void ClusterLoader::loadData()
+void ClusterLoaderJson::loadData()
 {
+    /*
     const QString fileName = AskForFileName(tr("BIN Files (*.bin)"));
 
     // Don't try to load a file if the dialog was cancelled or the file name is empty
@@ -126,76 +120,15 @@ void ClusterLoader::loadData()
         std::cout << "Number of loaded clusters: " << clusterData->getClusters().size() << std::endl;
 
     }
-
+    */
 }
 
-// =============================================================================
-// Loading input box
-// =============================================================================
-
-
-ClusterLoadingInputDialog::ClusterLoadingInputDialog(QWidget* parent, ClusterLoader& binLoader, QString fileName) :
-    QDialog(parent),
-    _datasetNameAction(this, "Dataset name", fileName),
-    _datasetPickerAction(this, "Source dataset"),
-    _loadAction(this, "Load"),
-    _groupAction(this, "Settings")
+LoaderPlugin* ClusterLoaderJsonFactory::produce()
 {
-    setWindowTitle("Cluster Loader");
-
-    _groupAction.addAction(&_datasetNameAction);
-    _groupAction.addAction(&_datasetPickerAction);
-    _groupAction.addAction(&_loadAction);
-
-    _loadAction.setEnabled(false);
-
-    auto layout = new QVBoxLayout();
-
-    layout->setContentsMargins(0, 0, 0, 0);
-    layout->addWidget(_groupAction.createWidget(this));
-
-    setLayout(layout);
-
-    // Update the state of the dataset picker
-    const auto updateDatasetPicker = [this]() -> void {
-        // Get unique identifier and gui names from all point data sets in the core
-        auto dataSets = mv::data().getAllDatasets({PointType});
-
-        // Assign found dataset(s)
-        _datasetPickerAction.setDatasets(dataSets);
-        };
-
-    // Accept when the load action is triggered
-    connect(&_loadAction, &TriggerAction::triggered, this, [this]() {
-        accept();
-        });
-
-    // Enable load once a parent data set was chosen
-    connect(&_datasetPickerAction, &DatasetPickerAction::datasetPicked, this, [this](mv::Dataset<mv::DatasetImpl> pickedDataset) {
-        _loadAction.setEnabled(true);
-        });
-
-    // Update dataset picker at startup
-    updateDatasetPicker();
+    return new ClusterLoaderJson(this);
 }
 
-// =============================================================================
-// Factory
-// =============================================================================
-
-ClusterLoaderFactory::ClusterLoaderFactory()
+DataTypes ClusterLoaderJsonFactory::supportedDataTypes() const
 {
-    setIconByName("database");
-}
-
-LoaderPlugin* ClusterLoaderFactory::produce()
-{
-    return new ClusterLoader(this);
-}
-
-DataTypes ClusterLoaderFactory::supportedDataTypes() const
-{
-    DataTypes supportedTypes;
-    supportedTypes.append(ClusterType);
-    return supportedTypes;
+    return { ClusterType };
 }

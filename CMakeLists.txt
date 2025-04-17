@@ -13,3 +13,5 @@ add_definitions(-DQT_MESSAGELOGCONTEXT)
 # -----------------------------------------------------------------------------
 add_subdirectory(ClusterLoader)
 add_subdirectory(ClusterExporter)
+add_subdirectory(ClusterLoaderJSON)
+add_subdirectory(ClusterExporterJSON)
