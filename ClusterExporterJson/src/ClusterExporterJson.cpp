@@ -29,18 +29,58 @@ void ClusterExporterJson::init()
 void ClusterExporterJson::writeData()
 {
     try {
-        const auto fileName = QFileDialog::getSaveFileName(nullptr, tr("JSON Files (*.json)"));
+        auto fileName = QFileDialog::getSaveFileName(
+            nullptr,
+            tr("Save JSON File"),
+            "clusters.json",
+            tr("JSON Files (*.json)")
+        );
 
-        if (fileName.isNull() || fileName.isEmpty())
-            throw std::runtime_error("File name is empty");
+    	if (fileName.isNull() || fileName.isEmpty())
+    		throw std::runtime_error("File name is empty");
 
+        if (!fileName.endsWith(".json", Qt::CaseInsensitive))
+            fileName += ".json";
+
+    	auto clustersDataset = getInputDataset<Clusters>();
+
+    	if (!clustersDataset.isValid())
+    		throw std::runtime_error("Invalid clusters dataset");
+
+    	QVariantList clustersList;
+
+    	clustersList.reserve(clustersDataset->getClusters().count());
+
+    	for (const auto& cluster : clustersDataset->getClusters()) {
+    		QVariantMap clusterMap({
+				{ "Name", cluster.getName() },
+				{ "ID", cluster.getId() },
+				{ "Color", cluster.getColor() }
+				});
+
+    		clustersList.push_back(clusterMap);
+    	}
+
+    	QFile jsonFile(fileName);
+
+    	if (!jsonFile.open(QFile::WriteOnly))
+    		throw std::runtime_error("Unable to open file for writing");
+
+    	const auto jsonDocument = QJsonDocument::fromVariant(QVariantMap({
+			{ "clusters", clustersList }
+		}));
+
+        if (jsonDocument.isNull() || jsonDocument.isEmpty())
+            throw std::runtime_error("JSON document is invalid");
+
+        jsonFile.write(jsonDocument.toJson());
     }
     catch (std::exception& e)
     {
-        exceptionMessageBox("Unable to load clusters", e);
+        exceptionMessageBox("Unable to export clusters", e);
     }
     catch (...) {
-        exceptionMessageBox("Unable to load clusters");
+        exceptionMessageBox("Unable to export clusters");
     }
 }
 
