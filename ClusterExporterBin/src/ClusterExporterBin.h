@@ -7,7 +7,6 @@
 #include "ClusterUtils.h"
 
 #include <QCheckBox>
-#include <QColor>
 #include <QDialog>
 #include <QGridLayout>
 #include <QPushButton>
@@ -56,59 +55,87 @@ private:
     QCheckBox       _saveColors;
 };
 
-// =============================================================================
-// ClusterExporter WriterPlugin
-// =============================================================================
-
-class ClusterExporter : public WriterPlugin
+/**
+ * Cluster exporter bin class
+ *
+ * Exporter for cluster data in binary format
+ *
+ * @author Alexander Vieth
+ */ 
+class ClusterExporterBin : public WriterPlugin
 {
-    Q_OBJECT
 public:
-    ClusterExporter(const PluginFactory* factory);
-    ~ClusterExporter(void) override;
 
+    /**
+     * Construct with pointer to \p factory
+     * @param factory
+     */
+    ClusterExporterBin(const PluginFactory* factory);
+
+    /** No need for custom destructor */
+    ~ClusterExporterBin() override = default;
+
+    /** Initialize the plugin */
     void init() override;
 
-    void writeData() Q_DECL_OVERRIDE;
+    /** Write the data to a file */
+    void writeData() override;
 
 private:
-    /*! Get data set contents from core
-     *
-     * \param dataSetName Data set name to request from core
+
+    /*
+     * Get data set contents from core
+     * @param dataSetName Data set name to request from core
     */
     utils::DataContent retrieveDataSetContent(mv::Dataset<Clusters>& dataSet);
 
+    /**
+     * Write cluster data to binary file
+     * @param writePath Path to write the file to
+     * @param dataContent Data content to write
+     * @param saveColors Flag indicating whether to save colors
+    */
     void writeClusterDataToBinary(const QString& writePath, const utils::DataContent& dataContent, bool saveColors);
 
+    /**
+     * Write info text to file
+     * @param writePath Path to write the file to
+     * @param dataContent Data content to write
+     * @param saveColors Flag indicating whether to save colors
+    */
     void writeInfoTextForBinary(const QString& writePath, const utils::DataContent& dataContent, bool saveColors);
-
 };
 
 
-// =============================================================================
-// Factory
-// =============================================================================
-
-class ClusterExporterFactory : public WriterPluginFactory
+/**
+ * Plugin factory for ClusterExporterJson
+ *
+ * @author Alexander Vieth
+ */
+class ClusterExporterBinFactory : public WriterPluginFactory
 {
     Q_INTERFACES(mv::plugin::WriterPluginFactory mv::plugin::PluginFactory)
-        Q_OBJECT
-        Q_PLUGIN_METADATA(IID   "manivault.studio.ClusterExporter"
-            FILE  "ClusterExporter.json")
+	Q_OBJECT
+    Q_PLUGIN_METADATA(IID "manivault.studio.ClusterExporterBin" FILE "ClusterExporterBin.json")
 
 public:
-    ClusterExporterFactory(void) {}
-    ~ClusterExporterFactory(void) override {}
+
+    /** No need for custom constructor */
+    ClusterExporterBinFactory() = default;
+
+    /** No need for custom destructor */
+    ~ClusterExporterBinFactory() override = default;
 
     /**
-     * Get plugin icon
-     * @param color Icon color for flat (font) icons
-     * @return Icon
+     * Create a new instance of the plugin
+     * @return Pointer to the new plugin instance
      */
-    QIcon getIcon(const QColor& color = Qt::black) const override;
-
     WriterPlugin* produce() override;
 
+    /**
+     * Get the supported data types
+     * @return Supported data types
+     */
     mv::DataTypes supportedDataTypes() const override;
 
     /**

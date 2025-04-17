@@ -1,0 +1,6 @@
+{
+    "name" : "Cluster Exporter JSON",
+    "menuName" : "Cluster (.json)",
+    "version" : "1",
+    "dependencies" : ["Points", "Cluster"]
+}

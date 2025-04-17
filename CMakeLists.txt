@@ -11,5 +11,7 @@ add_definitions(-DQT_MESSAGELOGCONTEXT)
 # -----------------------------------------------------------------------------
 # Plugins
 # -----------------------------------------------------------------------------
-add_subdirectory(ClusterLoader)
-add_subdirectory(ClusterExporter)
+add_subdirectory(ClusterLoaderBin)
+add_subdirectory(ClusterLoaderJson)
+add_subdirectory(ClusterExporterBin)
+add_subdirectory(ClusterExporterJson)

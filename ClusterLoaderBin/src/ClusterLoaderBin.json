@@ -1,5 +1,5 @@
 {
-    "name" : "Cluster Loader",
+    "name" : "Cluster Loader BIN",
     "menuName" : "Cluster (.bin)",
     "version" : "1",
     "dependencies": [ "Points", "Cluster" ]
