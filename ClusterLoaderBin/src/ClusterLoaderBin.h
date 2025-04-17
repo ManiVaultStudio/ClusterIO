@@ -14,14 +14,14 @@ using namespace mv::plugin;
 // Loading input box
 // =============================================================================
 
-class ClusterLoader;
+class ClusterLoaderBin;
 
 class ClusterLoadingInputDialog : public QDialog
 {
     Q_OBJECT
 
 public:
-    ClusterLoadingInputDialog(QWidget* parent, ClusterLoader& clusterLoader, QString fileName);
+    ClusterLoadingInputDialog(QWidget* parent, ClusterLoaderBin& clusterLoader, QString fileName);
 
     /** Get preferred size */
     QSize sizeHint() const override {
@@ -50,40 +50,61 @@ protected:
     mv::gui::GroupAction             _groupAction;                   /** Group action */
 };
 
-// =============================================================================
-// View
-// =============================================================================
-
-class ClusterLoader : public LoaderPlugin
+/**
+ * ClusterLoaderBin
+ *
+ * Loader for cluster data in binary format
+ *
+ * @author Alex Vieth
+ */
+class ClusterLoaderBin : public LoaderPlugin
 {
-    Q_OBJECT
 public:
-    ClusterLoader(const PluginFactory* factory) : LoaderPlugin(factory) { }
-    ~ClusterLoader(void) override;
 
+    /**
+     * Construct with pointer to \p factory
+     * @param factory
+     */
+    ClusterLoaderBin(const PluginFactory* factory);
+
+    /** No need for custom destructor */
+    ~ClusterLoaderBin() override = default;
+
+    /** Initialize the plugin */
     void init() override;
 
-    void loadData() Q_DECL_OVERRIDE;
+    /** Load the data from a file */
+    void loadData() override;
 };
 
 
-// =============================================================================
-// Factory
-// =============================================================================
-
-class ClusterLoaderFactory : public LoaderPluginFactory
+/**
+ * Plugin factory for ClusterLoaderJson
+ *
+ * @author Alex Vieth
+ */
+class ClusterLoaderBinFactory : public LoaderPluginFactory
 {
     Q_INTERFACES(mv::plugin::LoaderPluginFactory mv::plugin::PluginFactory)
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID   "manivault.studio.ClusterLoader"
-                      FILE  "ClusterLoader.json")
+    Q_PLUGIN_METADATA(IID "manivault.studio.ClusterLoaderBin" FILE "ClusterLoaderBin.json")
 
 public:
-    ClusterLoaderFactory();
+    /** No need for custom constructor */
+    ClusterLoaderBinFactory() = default;
 
-    ~ClusterLoaderFactory() override {}
+    /** No need for custom destructor */
+    ~ClusterLoaderBinFactory() override = default;
 
+    /**
+     * Create a new instance of the plugin
+     * @return Pointer to the new plugin instance
+     */
     LoaderPlugin* produce() override;
 
+    /**
+     * Get the supported data types
+     * @return Supported data types
+     */
     mv::DataTypes supportedDataTypes() const override;
 };

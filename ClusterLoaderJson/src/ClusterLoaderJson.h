@@ -8,7 +8,7 @@
 
 using namespace mv::plugin;
 
-class ClusterLoader;
+class ClusterLoaderBin;
 
 /**
  * ClusterLoaderJson
