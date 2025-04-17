@@ -29,14 +29,9 @@ LoaderInputDialog::LoaderInputDialog(QWidget* parent, QString fileName) :
 
     setLayout(layout);
 
-    // Update the state of the dataset picker
-    const auto updateDatasetPicker = [this]() -> void {
-        // Get unique identifier and gui names from all point data sets in the core
-        auto dataSets = mv::data().getAllDatasets({ PointType });
-
-        // Assign found dataset(s)
-        _datasetPickerAction.setDatasets(dataSets);
-	};
+    _datasetPickerAction.setFilterFunction([this](mv::Dataset<DatasetImpl> dataset) -> bool {
+        return dataset->getDataType() == PointType;
+	});
 
     // Accept when the load action is triggered
     connect(&_loadAction, &TriggerAction::triggered, this, [this]() {
@@ -47,7 +42,4 @@ LoaderInputDialog::LoaderInputDialog(QWidget* parent, QString fileName) :
     connect(&_datasetPickerAction, &DatasetPickerAction::datasetPicked, this, [this](mv::Dataset<mv::DatasetImpl> pickedDataset) {
         _loadAction.setEnabled(true);
 	});
-
-    // Update dataset picker at startup
-    updateDatasetPicker();
 }

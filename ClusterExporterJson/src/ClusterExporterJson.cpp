@@ -5,7 +5,6 @@
 #include <PointData/PointData.h>
 
 #include <QFileDialog>
-#include <QFileInfo>
 #include <QSettings>
 
 #include <fstream>
@@ -29,23 +28,28 @@ void ClusterExporterJson::init()
 void ClusterExporterJson::writeData()
 {
     try {
-        auto fileName = QFileDialog::getSaveFileName(
+        auto clustersJsonFilePath = QFileDialog::getSaveFileName(
             nullptr,
-            tr("Save JSON File"),
+            tr("Save clusters JSON file"),
             "clusters.json",
             tr("JSON Files (*.json)")
         );
 
-    	if (fileName.isNull() || fileName.isEmpty())
+    	if (clustersJsonFilePath.isNull() || clustersJsonFilePath.isEmpty())
     		throw std::runtime_error("File name is empty");
 
-        if (!fileName.endsWith(".json", Qt::CaseInsensitive))
-            fileName += ".json";
+        if (!clustersJsonFilePath.endsWith(".json", Qt::CaseInsensitive))
+            clustersJsonFilePath += ".json";
 
     	auto clustersDataset = getInputDataset<Clusters>();
 
     	if (!clustersDataset.isValid())
     		throw std::runtime_error("Invalid clusters dataset");
+
+        auto sourcePointsDataset = Dataset<Points>(clustersDataset->getParent());
+
+        if (!sourcePointsDataset.isValid())
+            throw std::runtime_error("Invalid source points dataset");
 
     	QVariantList clustersList;
 
@@ -64,13 +68,18 @@ void ClusterExporterJson::writeData()
     		clustersList.push_back(clusterMap);
     	}
 
-    	QFile jsonFile(fileName);
+    	QFile jsonFile(clustersJsonFilePath);
 
     	if (!jsonFile.open(QFile::WriteOnly))
     		throw std::runtime_error("Unable to open file for writing");
 
+        const auto sourcePointsDatasetMap = QVariantMap({
+            { "NumberOfPoints", sourcePointsDataset->getNumPoints() }
+        });
+
     	const auto jsonDocument = QJsonDocument::fromVariant(QVariantMap({
-			{ "clusters", clustersList }
+			{ "Clusters", clustersList },
+            { "SourcePointsDataset", sourcePointsDatasetMap }
 		}));
 
         if (jsonDocument.isNull() || jsonDocument.isEmpty())
@@ -78,20 +87,20 @@ void ClusterExporterJson::writeData()
 
         jsonFile.write(jsonDocument.toJson());
 
-        addNotification(QString("Clusters exported to %1").arg(fileName));
+        addNotification(QString("Clusters exported to <i>%1<i/>").arg(clustersJsonFilePath));
     }
     catch (std::exception& e)
     {
-        exceptionMessageBox("Unable to export clusters", e);
+        mv::help().addNotification("Unable to export clusters", e.what(), StyledIcon("circle-exclamation"));
     }
     catch (...) {
-        exceptionMessageBox("Unable to export clusters");
+        mv::help().addNotification("Unable to export clusters", "An expected problem occurred", StyledIcon("circle-exclamation"));
     }
 }
 
 WriterPlugin* ClusterExporterJsonFactory::produce()
 {
-    return new ClusterExporterJson(this);
+    return new ClusterExporterJson(this); 
 }
 
 DataTypes ClusterExporterJsonFactory::supportedDataTypes() const

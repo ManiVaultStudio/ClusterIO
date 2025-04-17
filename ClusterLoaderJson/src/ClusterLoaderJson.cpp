@@ -5,6 +5,8 @@
 #include <ClusterData/ClusterData.h>
 #include <PointData/PointData.h>
 
+#include <QFileDialog>
+
 #include <iostream>
 
 Q_PLUGIN_METADATA(IID "manivault.studio.ClusterLoaderJson")
@@ -25,74 +27,111 @@ void ClusterLoaderJson::init()
 void ClusterLoaderJson::loadData()
 {
     try {
-        const auto fileName = AskForFileName(tr("JSON Files (*.json)"));
+        QString clustersJsonFilePath = QFileDialog::getOpenFileName(
+            nullptr,
+            QObject::tr("Open clusters JSON file"),
+            QString(getSetting("Directory/Open", "~").toString()),
+            QObject::tr("JSON Files (*.json)")
+        );
 
-        if (fileName.isNull() || fileName.isEmpty())
-            return;
+        if (clustersJsonFilePath.isNull() || clustersJsonFilePath.isEmpty())
+            throw std::runtime_error("File name is empty");
 
-        LoaderInputDialog inputDialog(nullptr, QFileInfo(fileName).baseName());
+        setSetting("Directory/Open", QFileInfo(clustersJsonFilePath).absoluteDir().absolutePath());
+
+        LoaderInputDialog inputDialog(nullptr, QFileInfo(clustersJsonFilePath).baseName());
 
         const auto dialogResult = inputDialog.exec();
 
-        if (dialogResult == QDialog::Accepted && !inputDialog.getDatasetName().isEmpty()) {
+        if (dialogResult == QDialog::Rejected)
+            return;
 
-            //bool readColors = false;
+    	if (inputDialog.getDatasetName().isEmpty())
+            throw std::runtime_error("Dataset name is empty");
 
-            //assert(dataContent.numClusters == dataContent.clusterNames.size());
-            //assert(dataContent.numClusters == dataContent.clusterSizes.size());
-            //assert(!readColors || dataContent.clusterColors.size() == dataContent.numClusters * 3);
+        if (!QFileInfo(clustersJsonFilePath).exists())
+            throw std::runtime_error("File does not exist");
 
-            auto sourceDataset = inputDialog.getSourceDataset();
+        QFile jsonFile(clustersJsonFilePath);
 
-            if (!sourceDataset.isValid())
-                throw std::runtime_error("Selected parent data set is not valid");
+        if (!jsonFile.open(QIODevice::ReadOnly))
+            throw std::runtime_error("Unable to open file for reading");
 
-            //if (dataContent.parentNumPoints != mv::data().getDataset<Points>(sourceDataset.getDatasetId())->getNumPoints())
-            //{
-            //    std::cout << "ClusterLoaderBin: Selected parent has a different number of points  (" << mv::data().getDataset<Points>(sourceDataset.getDatasetId())->getNumPoints() << ") from loaded clusters (" << dataContent.parentNumPoints << ")" << std::endl;
-            //    return;
-            //}
+        QByteArray data = jsonFile.readAll();
 
-            //if (dataContent.parentName != sourceDataset.getDataset()->text().toStdString())
-            //{
-            //    std::cout << "ClusterLoaderBin: Selected parent data is not the parent of the object to be loaded (we will continue anyways)" << std::endl;
-            //    std::cout << "ClusterLoaderBin: loaded parent name: " << dataContent.parentName << std::endl;
-            //    std::cout << "ClusterLoaderBin: designated parent name: " << sourceDataset.getDataset()->text().toStdString() << std::endl;
-            //}
+        auto jsonDocument = QJsonDocument::fromJson(data);
 
-            auto clusterData = mv::data().createDataset<Clusters>("Cluster", inputDialog.getDatasetName(), sourceDataset);
+        if (jsonDocument.isNull() || jsonDocument.isEmpty())
+            throw std::runtime_error("JSON document is invalid");
 
-            events().notifyDatasetAdded(clusterData);
+        const auto documentVariantMap = jsonDocument.toVariant().toMap();
 
-            //size_t numC = dataContent.numClusters;
-            //size_t globalIndicesOffset = 0;
+        if (!documentVariantMap.contains("Clusters"))
+            throw std::runtime_error("<b>Clusters</b> not found in JSON document");
 
-            //for (size_t i = 0; i < numC; i++) {
-            //    Cluster cluster;
+        if (!documentVariantMap.contains("SourcePointsDataset"))
+            throw std::runtime_error("<b>SourcePointsDataset</b> not found in JSON document");
 
-            //    cluster.setName(QString::fromStdString(dataContent.clusterNames[i]));
+        const auto sourcePointsDatasetMap = documentVariantMap["SourcePointsDataset"].toMap();
 
-            //    cluster.getIndices() = std::vector<std::uint32_t>(dataContent.clusterIndices.begin() + globalIndicesOffset, dataContent.clusterIndices.begin() + globalIndicesOffset + dataContent.clusterSizes[i]);
-            //    globalIndicesOffset += dataContent.clusterSizes[i];
+        if (!sourcePointsDatasetMap.contains("NumberOfPoints"))
+            throw std::runtime_error("<b>SourcePointsDataset/NumberOfPoints</b> not found in JSON document");
+        
+        const auto numberOfPoints = sourcePointsDatasetMap["NumberOfPoints"].toInt();
 
-            //    if (readColors)
-            //    {
-            //        QColor color = { dataContent.clusterColors[i * 3], dataContent.clusterColors[i * 3 + 1] , dataContent.clusterColors[i * 3 + 2] };
-            //        cluster.setColor(color);
-            //    }
+        if (numberOfPoints != Dataset<Points>(inputDialog.getSourceDataset())->getNumPoints())
+            throw std::runtime_error("Number of points in JSON document does not match the selected dataset");
 
-            //    clusterData->addCluster(cluster);
-            //}
+    	const auto clustersList = documentVariantMap["Clusters"].toList();
 
-            events().notifyDatasetDataChanged(clusterData);
-    }
+        auto sourceDataset = inputDialog.getSourceDataset();
+
+        if (!sourceDataset.isValid())
+            throw std::runtime_error("Selected parent data set is not valid");
+
+        auto clusterData = mv::data().createDataset<Clusters>("Cluster", inputDialog.getDatasetName(), sourceDataset);
+
+        events().notifyDatasetAdded(clusterData);
+
+        clusterData->getTask().setSubtasks(clustersList.count());
+        clusterData->getTask().setRunning();
+
+        for (const auto& clusterVariant : clustersList) {
+            const auto clusterIndex = clustersList.indexOf(clusterVariant);
+
+            clusterData->getTask().setSubtaskStarted(clusterIndex);
+            {
+	            const auto clusterMap = clusterVariant.toMap();
+
+        		Cluster cluster;
+
+	            cluster.setName(clusterMap["Name"].toString());
+	            cluster.setId(clusterMap["ID"].toString());
+	            cluster.setColor(clusterMap["Color"].toString());
+
+	            const auto& indices = clusterMap["Indices"].toList();
+
+	            cluster.getIndices().reserve(indices.size());
+
+        		std::transform(indices.begin(), indices.end(), std::back_inserter(cluster.getIndices()), [](const QVariant& v) { return v.toInt(); });
+
+	            clusterData->addCluster(cluster);
+            }
+            clusterData->getTask().setSubtaskFinished(clusterIndex);
+        }
+
+        clusterData->getTask().setFinished();
+
+        events().notifyDatasetDataChanged(clusterData);
+
+        addNotification(QString("Clusters loaded from <i>%1</i>").arg(clustersJsonFilePath));
     }
     catch (std::exception& e)
     {
-        exceptionMessageBox("Unable to load clusters", e);
+        mv::help().addNotification("Cannot load clusters", e.what(), StyledIcon("circle-exclamation"));
     }
     catch (...) {
-        exceptionMessageBox("Unable to load clusters");
+        mv::help().addNotification("Cannot load clusters", "An expected problem occurred", StyledIcon("circle-exclamation"));
     }
 }
 
