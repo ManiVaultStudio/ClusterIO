@@ -64,7 +64,7 @@ PluginTriggerActions ClusterExporterJsonFactory::getPluginTriggerActions(const m
 
     if (PluginFactory::areAllDatasetsOfTheSameType(datasets, ClusterType)) {
         if (datasets.count() >= 1) {
-            auto pluginTriggerAction = new PluginTriggerAction(const_cast<ClusterExporterJsonFactory*>(this), this, "ClusterExporterJson", "Export cluster to JSON file", icon(), [this, getPluginInstance, datasets](PluginTriggerAction& pluginTriggerAction) -> void {
+            auto pluginTriggerAction = new PluginTriggerAction(const_cast<ClusterExporterJsonFactory*>(this), this, "Clusters (JSON)", "Export clusters to JSON file", icon(), [this, getPluginInstance, datasets](PluginTriggerAction& pluginTriggerAction) -> void {
                 for (const auto& dataset : datasets)
                     getPluginInstance(dataset);
             });
