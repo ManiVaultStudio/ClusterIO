@@ -1,4 +1,4 @@
-#include "ClusterExporter.h"
+#include "ClusterExporterBin.h"
 
 #include <actions/PluginTriggerAction.h>
 
@@ -13,25 +13,21 @@
 #include <fstream>
 #include <iostream>
 
-Q_PLUGIN_METADATA(IID "manivault.studio.ClusterExporter")
+Q_PLUGIN_METADATA(IID "manivault.studio.ClusterExporterBin")
 
 using namespace mv;
 using namespace mv::gui;
 
-ClusterExporter::ClusterExporter(const PluginFactory* factory) :
+ClusterExporterBin::ClusterExporterBin(const PluginFactory* factory) :
     WriterPlugin(factory)
 {
 }
 
-ClusterExporter::~ClusterExporter(void)
+void ClusterExporterBin::init()
 {
 }
 
-void ClusterExporter::init()
-{
-}
-
-void ClusterExporter::writeData()
+void ClusterExporterBin::writeData()
 {
     auto inputDataset = getInputDataset<Clusters>();
 
@@ -53,12 +49,12 @@ void ClusterExporter::writeData()
         // Only continue when the dialog has not been not canceled and the file name is non-empty.
         if (fileName.isNull() || fileName.isEmpty())
         {
-            std::cout << "ClusterExporter: No data written to disk - File name empty" << std::endl;
+            std::cout << "ClusterExporterBin: No data written to disk - File name empty" << std::endl;
             return;
         }
         else if (inputDataset->getParent().getDataset()->getDataType() != PointType)
         {
-            std::cout << "ClusterExporter: Parent of selected dataset must be points data - Doing nothing" << std::endl;
+            std::cout << "ClusterExporterBin: Parent of selected dataset must be points data - Doing nothing" << std::endl;
             return;
         }
         else
@@ -70,18 +66,18 @@ void ClusterExporter::writeData()
             utils::DataContent dataContent = retrieveDataSetContent(inputDataset);
             writeClusterDataToBinary(fileName, dataContent, inputDialog.saveColors());
             writeInfoTextForBinary(fileName, dataContent, inputDialog.saveColors());
-            std::cout << "ClusterExporter: Data written to disk - File name: " << fileName.toStdString() << std::endl;
+            std::cout << "ClusterExporterBin: Data written to disk - File name: " << fileName.toStdString() << std::endl;
             return;
         }
     }
     else
     {
-        std::cout << "ClusterExporter: No data written to disk - No data set selected" << std::endl;
+        std::cout << "ClusterExporterBin: No data written to disk - No data set selected" << std::endl;
         return;
     }
 }
 
-utils::DataContent ClusterExporter::retrieveDataSetContent(mv::Dataset<Clusters>& dataSet) {
+utils::DataContent ClusterExporterBin::retrieveDataSetContent(mv::Dataset<Clusters>& dataSet) {
     utils::DataContent dataContent;
 
     dataContent.numClusters = dataSet->getClusters().size();
@@ -108,7 +104,7 @@ utils::DataContent ClusterExporter::retrieveDataSetContent(mv::Dataset<Clusters>
     return dataContent;
 }
 
-void ClusterExporter::writeClusterDataToBinary(const QString& writePath, const utils::DataContent& dataContent, bool saveColors)
+void ClusterExporterBin::writeClusterDataToBinary(const QString& writePath, const utils::DataContent& dataContent, bool saveColors)
 {
     std::ofstream fout(writePath.toStdString(), std::ofstream::out | std::ofstream::binary);
 
@@ -128,7 +124,7 @@ void ClusterExporter::writeClusterDataToBinary(const QString& writePath, const u
     fout.close();
 }
 
-void ClusterExporter::writeInfoTextForBinary(const QString& writePath, const utils::DataContent& dataContent, bool saveColors) {
+void ClusterExporterBin::writeInfoTextForBinary(const QString& writePath, const utils::DataContent& dataContent, bool saveColors) {
     std::string infoText;
     std::string fileName = QFileInfo(writePath).fileName().toStdString();
 
@@ -149,34 +145,27 @@ void ClusterExporter::writeInfoTextForBinary(const QString& writePath, const uti
 // Factory
 // =============================================================================
 
-WriterPlugin* ClusterExporterFactory::produce()
+WriterPlugin* ClusterExporterBinFactory::produce()
 {
-    return new ClusterExporter(this);
+    return new ClusterExporterBin(this);
 }
 
-QIcon ClusterExporterFactory::getIcon(const QColor& color /*= Qt::black*/) const
+DataTypes ClusterExporterBinFactory::supportedDataTypes() const
 {
-    return Application::getIconFont("FontAwesome").getIcon("database", color);
+    return { ClusterType };
 }
 
-DataTypes ClusterExporterFactory::supportedDataTypes() const
-{
-    DataTypes supportedTypes;
-    supportedTypes.append(ClusterType);
-    return supportedTypes;
-}
-
-PluginTriggerActions ClusterExporterFactory::getPluginTriggerActions(const mv::Datasets& datasets) const
+PluginTriggerActions ClusterExporterBinFactory::getPluginTriggerActions(const mv::Datasets& datasets) const
 {
     PluginTriggerActions pluginTriggerActions;
 
-    const auto getPluginInstance = [this](const Dataset<Clusters>& dataset) -> ClusterExporter* {
-        return dynamic_cast<ClusterExporter*>(plugins().requestPlugin(getKind(), { dataset }));
+    const auto getPluginInstance = [this](const Dataset<Clusters>& dataset) -> ClusterExporterBin* {
+        return dynamic_cast<ClusterExporterBin*>(plugins().requestPlugin(getKind(), { dataset }));
     };
 
     if (PluginFactory::areAllDatasetsOfTheSameType(datasets, ClusterType)) {
         if (datasets.count() >= 1) {
-            auto pluginTriggerAction = new PluginTriggerAction(const_cast<ClusterExporterFactory*>(this), this, "ClusterExporter", "Export cluster to binary file", getIcon(), [this, getPluginInstance, datasets](PluginTriggerAction& pluginTriggerAction) -> void {
+            auto pluginTriggerAction = new PluginTriggerAction(const_cast<ClusterExporterBinFactory*>(this), this, "ClusterExporterBin", "Export cluster to binary file", icon(), [this, getPluginInstance, datasets](PluginTriggerAction& pluginTriggerAction) -> void {
                 for (const auto& dataset : datasets)
                     getPluginInstance(dataset);
             });

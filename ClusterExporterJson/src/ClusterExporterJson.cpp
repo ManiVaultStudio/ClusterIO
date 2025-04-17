@@ -143,19 +143,6 @@ void ClusterExporter::writeInfoTextForBinary(const QString& writePath, const uti
 }
 */
 
-// =============================================================================
-// Factory
-// =============================================================================
-
-ClusterExporterJsonFactory::ClusterExporterJsonFactory()
-{
-}
-
-void ClusterExporterJsonFactory::initialize()
-{
-    setIconByName("file-export");
-}
-
 WriterPlugin* ClusterExporterJsonFactory::produce()
 {
     return new ClusterExporterJson(this);

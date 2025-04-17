@@ -52,14 +52,11 @@ class ClusterExporterJsonFactory : public WriterPluginFactory
 
 public:
 
-    /** Default constructor */
-    ClusterExporterJsonFactory();
+    /** No need for custom constructor */
+    ClusterExporterJsonFactory() = default;
 
     /** No need for custom destructor */
     ~ClusterExporterJsonFactory() override = default;
-
-    /** Initialize the plugin factory */
-    void initialize() override;
 
     /**
      * Create a new instance of the plugin
