@@ -16,40 +16,6 @@ using namespace mv::plugin;
 
 class ClusterLoaderBin;
 
-class ClusterLoadingInputDialog : public QDialog
-{
-    Q_OBJECT
-
-public:
-    ClusterLoadingInputDialog(QWidget* parent, ClusterLoaderBin& clusterLoader, QString fileName);
-
-    /** Get preferred size */
-    QSize sizeHint() const override {
-        return QSize(400, 50);
-    }
-
-    /** Get minimum size hint*/
-    QSize minimumSizeHint() const override {
-        return sizeHint();
-    }
-
-    /** Get the GUI name of the loaded dataset */
-    QString getDatasetName() const {
-        return _datasetNameAction.getString();
-    }
-
-    /** Get smart pointer to dataset (if any) */
-    mv::Dataset<mv::DatasetImpl> getSourceDataset() {
-        return _datasetPickerAction.getCurrentDataset();
-    }
-
-protected:
-    mv::gui::StringAction            _datasetNameAction;             /** Dataset name action */
-    mv::gui::DatasetPickerAction     _datasetPickerAction;           /** Dataset picker action for picking source datasets */
-    mv::gui::TriggerAction           _loadAction;                    /** Load action */
-    mv::gui::GroupAction             _groupAction;                   /** Group action */
-};
-
 /**
  * ClusterLoaderBin
  *

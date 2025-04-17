@@ -22,12 +22,19 @@ void ClusterLoaderJson::init()
 
 void ClusterLoaderJson::loadData()
 {
+    const auto fileName = AskForFileName(tr("JSON Files (*.json)"));
+
+    if (fileName.isNull() || fileName.isEmpty())
+        return;
+
+    //auto clusterData = mv::data().createDataset<Clusters>("Cluster", inputDialog.getDatasetName(), sourceDataset);
+
+
     /*
     const QString fileName = AskForFileName(tr("BIN Files (*.bin)"));
 
     // Don't try to load a file if the dialog was cancelled or the file name is empty
-    if (fileName.isNull() || fileName.isEmpty())
-        return;
+    
 
     ClusterLoadingInputDialog inputDialog(nullptr, *this, QFileInfo(fileName).baseName());
 

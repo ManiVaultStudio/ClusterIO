@@ -37,6 +37,8 @@ set(CLUSTERLOADER_SOURCES
 
 set(COMMON_SOURCES
     ../Common/ClusterUtils.h
+	../Common/LoaderInputDialog.h
+	../Common/LoaderInputDialog.cpp
 )
 
 source_group(Plugin FILES ${CLUSTERLOADER_SOURCES})
