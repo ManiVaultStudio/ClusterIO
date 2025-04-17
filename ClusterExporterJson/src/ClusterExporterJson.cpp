@@ -52,11 +52,14 @@ void ClusterExporterJson::writeData()
     	clustersList.reserve(clustersDataset->getClusters().count());
 
     	for (const auto& cluster : clustersDataset->getClusters()) {
+            const auto clusterIndicesList = QVariantList(cluster.getIndices().begin(), cluster.getIndices().end());;
+
     		QVariantMap clusterMap({
 				{ "Name", cluster.getName() },
 				{ "ID", cluster.getId() },
-				{ "Color", cluster.getColor() }
-				});
+				{ "Color", cluster.getColor() },
+				{ "Indices", clusterIndicesList }
+			});
 
     		clustersList.push_back(clusterMap);
     	}
@@ -74,6 +77,8 @@ void ClusterExporterJson::writeData()
             throw std::runtime_error("JSON document is invalid");
 
         jsonFile.write(jsonDocument.toJson());
+
+        addNotification(QString("Clusters exported to %1").arg(fileName));
     }
     catch (std::exception& e)
     {
