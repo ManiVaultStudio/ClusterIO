@@ -120,9 +120,7 @@ void ClusterLoaderBin::loadData()
         events().notifyDatasetDataChanged(clusterData);
 
         std::cout << "Number of loaded clusters: " << clusterData->getClusters().size() << std::endl;
-
     }
-
 }
 
 LoaderPlugin* ClusterLoaderBinFactory::produce()

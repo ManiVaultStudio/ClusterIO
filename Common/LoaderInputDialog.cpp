@@ -4,6 +4,7 @@
 
 using namespace mv;
 using namespace mv::gui;
+using namespace mv::util;
 
 LoaderInputDialog::LoaderInputDialog(QWidget* parent, QString fileName) :
     QDialog(parent),
@@ -13,6 +14,7 @@ LoaderInputDialog::LoaderInputDialog(QWidget* parent, QString fileName) :
     _groupAction(this, "Settings")
 {
     setWindowTitle("Cluster Loader");
+    setWindowIcon(StyledIcon("file-import"));
 
     _groupAction.addAction(&_datasetNameAction);
     _groupAction.addAction(&_datasetPickerAction);

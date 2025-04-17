@@ -35,16 +35,24 @@ set(CLUSTER_LOADER_JSON_SOURCES
     src/ClusterLoaderJson.json
 )
 
+set(COMMON_SOURCES
+    ../Common/ClusterUtils.h
+	../Common/LoaderInputDialog.h
+	../Common/LoaderInputDialog.cpp
+)
+
 source_group(Plugin FILES ${CLUSTER_LOADER_JSON_SOURCES})
+source_group(Common FILES ${COMMON_SOURCES})
 
 # -----------------------------------------------------------------------------
 # CMake Target
 # -----------------------------------------------------------------------------
-add_library(${CLUSTER_LOADER_JSON} SHARED ${CLUSTER_LOADER_JSON_SOURCES})
+add_library(${CLUSTER_LOADER_JSON} SHARED ${CLUSTER_LOADER_JSON_SOURCES} ${COMMON_SOURCES})
 
 # -----------------------------------------------------------------------------
 # Target include directories
 # -----------------------------------------------------------------------------
+target_include_directories(${CLUSTER_LOADER_JSON} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../Common/")
 target_include_directories(${CLUSTER_LOADER_JSON} PRIVATE "${ManiVault_INCLUDE_DIR}")
 
 # -----------------------------------------------------------------------------

@@ -4,17 +4,9 @@
 
 #include <LoaderPlugin.h>
 
-#include <QDialog>
-
 #include <fstream>
 
 using namespace mv::plugin;
-
-// =============================================================================
-// Loading input box
-// =============================================================================
-
-class ClusterLoaderBin;
 
 /**
  * ClusterLoaderBin
