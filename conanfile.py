@@ -112,7 +112,7 @@ class ClusterIOPluginConan(ConanFile):
 
     def _configure_cmake(self):
         cmake = CMake(self)
-        cmake.configure(build_script_folder="hdps/BinIO")
+        cmake.configure(build_script_folder="ManiVaultStudio/ClusterIO")
         cmake.verbose = True
         return cmake
 
