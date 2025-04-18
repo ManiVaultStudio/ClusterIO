@@ -16,6 +16,8 @@ using namespace mv::gui;
  */
 class ClusterExporterJson : public WriterPlugin
 {
+    Q_OBJECT
+
 public:
 
 	/**
