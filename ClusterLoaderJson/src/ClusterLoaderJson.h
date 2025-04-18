@@ -19,6 +19,8 @@ class ClusterLoaderBin;
  */
 class ClusterLoaderJson : public LoaderPlugin
 {
+    Q_OBJECT
+
 public:
 
     /**
@@ -38,7 +40,7 @@ public:
 };
 
 /**
- * Plugin factory for ClusterLoaderJson
+ * Plugin factory for creating cluster loader (JSON) instances
  *
  * @author Thomas Kroes
  */

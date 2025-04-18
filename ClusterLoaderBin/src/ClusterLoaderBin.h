@@ -17,6 +17,8 @@ using namespace mv::plugin;
  */
 class ClusterLoaderBin : public LoaderPlugin
 {
+    Q_OBJECT
+
 public:
 
     /**
@@ -37,7 +39,7 @@ public:
 
 
 /**
- * Plugin factory for ClusterLoaderJson
+ * Plugin factory for creating cluster loader (BIN) instances
  *
  * @author Alex Vieth
  */
