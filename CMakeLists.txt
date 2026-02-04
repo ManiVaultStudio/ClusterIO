@@ -4,7 +4,9 @@ cmake_minimum_required(VERSION 3.17)
 # ClusterIO plugins
 # -----------------------------------------------------------------------------
 set(PROJECT "ClusterIO")
-PROJECT(${PROJECT})
+PROJECT(${PROJECT}
+        LANGUAGES CXX
+)
 
 add_definitions(-DQT_MESSAGELOGCONTEXT)
 
