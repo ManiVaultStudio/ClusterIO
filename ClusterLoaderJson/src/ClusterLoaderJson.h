@@ -48,7 +48,7 @@ class ClusterLoaderJsonFactory : public LoaderPluginFactory
 {
     Q_INTERFACES(mv::plugin::LoaderPluginFactory mv::plugin::PluginFactory)
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID "manivault.studio.ClusterLoaderJson" FILE "ClusterLoaderJson.json")
+    Q_PLUGIN_METADATA(IID "manivault.studio.ClusterLoaderJson" FILE "PluginInfo.json")
 
 public:
 

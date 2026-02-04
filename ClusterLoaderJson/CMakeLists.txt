@@ -1,10 +1,11 @@
-cmake_minimum_required(VERSION 3.17)
+cmake_minimum_required(VERSION 3.22)
 
 # -----------------------------------------------------------------------------
 # Cluster Loader Plugin
 # -----------------------------------------------------------------------------
 set(CLUSTER_LOADER_JSON "ClusterLoaderJson")
-PROJECT(${CLUSTER_LOADER_JSON})
+PROJECT(${CLUSTER_LOADER_JSON}
+        LANGUAGES CXX)
 
 # -----------------------------------------------------------------------------
 # CMake Options
@@ -12,12 +13,12 @@ PROJECT(${CLUSTER_LOADER_JSON})
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-if(MSVC)
+if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3 /DWIN32 /EHsc /MP /permissive- /Zc:__cplusplus")
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MDd")
     set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} /MD")
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MD")
-endif(MSVC)
+endif()
 
 # -----------------------------------------------------------------------------
 # Dependencies
@@ -32,7 +33,7 @@ find_package(ManiVault COMPONENTS Core PointData ClusterData CONFIG)
 set(CLUSTER_LOADER_JSON_SOURCES
     src/ClusterLoaderJson.h
     src/ClusterLoaderJson.cpp
-    src/ClusterLoaderJson.json
+    PluginInfo.json
 )
 
 set(COMMON_SOURCES
@@ -87,16 +88,13 @@ add_custom_command(TARGET ${CLUSTER_LOADER_JSON} POST_BUILD
         --prefix ${ManiVault_INSTALL_DIR}/$<CONFIGURATION>
 )
 
-set_target_properties(${CLUSTER_LOADER_JSON}
-    PROPERTIES
-    FOLDER LoaderPlugins
-)
+mv_handle_plugin_config(${CLUSTER_LOADER_JSON})
 
 # -----------------------------------------------------------------------------
 # Miscellaneous
 # -----------------------------------------------------------------------------
 # Automatically set the debug environment (command + working directory) for MSVC
-if(MSVC)
+if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     set_property(TARGET ${BINLOADER} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY $<IF:$<CONFIG:DEBUG>,${ManiVault_INSTALL_DIR}/Debug,$<IF:$<CONFIG:RELWITHDEBINFO>,${ManiVault_INSTALL_DIR}/RelWithDebInfo,${ManiVault_INSTALL_DIR}/Release>>)
     set_property(TARGET ${BINLOADER} PROPERTY VS_DEBUGGER_COMMAND $<IF:$<CONFIG:DEBUG>,"${ManiVault_INSTALL_DIR}/Debug/ManiVault Studio.exe",$<IF:$<CONFIG:RELWITHDEBINFO>,"${ManiVault_INSTALL_DIR}/RelWithDebInfo/ManiVault Studio.exe","${ManiVault_INSTALL_DIR}/Release/ManiVault Studio.exe">>)
 endif()

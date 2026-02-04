@@ -1,6 +1,10 @@
 {
     "name" : "Cluster Exporter BIN",
     "menuName" : "Cluster (.bin)",
-    "version" : "1",
+    "version" :  {
+        "plugin" : "1.0.0",
+        "core" : ["1.3"]
+    },
+    "type" : "Writer",
     "dependencies" : ["Points", "Cluster"]
 }

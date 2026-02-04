@@ -1,10 +1,11 @@
-cmake_minimum_required(VERSION 3.17)
+cmake_minimum_required(VERSION 3.22)
 
 # -----------------------------------------------------------------------------
 # Cluster Writer Plugin
 # -----------------------------------------------------------------------------
 set(CLUSTER_EXPORTER_BIN "ClusterExporterBin")
-PROJECT(${CLUSTER_EXPORTER_BIN})
+PROJECT(${CLUSTER_EXPORTER_BIN}
+        LANGUAGES CXX)
 
 # -----------------------------------------------------------------------------
 # CMake Options
@@ -12,12 +13,12 @@ PROJECT(${CLUSTER_EXPORTER_BIN})
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-if(MSVC)
+if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3 /DWIN32 /EHsc /MP /permissive- /Zc:__cplusplus")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /NODEFAULTLIB:LIBCMT")
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MDd")
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MD")
-endif(MSVC)
+endif()
 
 # -----------------------------------------------------------------------------
 # Dependencies
@@ -32,7 +33,7 @@ find_package(ManiVault COMPONENTS Core PointData ClusterData CONFIG)
 set(CLUSTER_EXPORTER_BIN_SOURCES
     src/ClusterExporterBin.h
     src/ClusterExporterBin.cpp
-    src/ClusterExporterBin.json
+    PluginInfo.json
 )
 
 set(COMMON_SOURCES
@@ -85,11 +86,13 @@ add_custom_command(TARGET ${CLUSTER_EXPORTER_BIN} POST_BUILD
         --prefix ${ManiVault_INSTALL_DIR}/$<CONFIGURATION>
 )
 
+mv_handle_plugin_config(${CLUSTER_EXPORTER_BIN})
+
 # -----------------------------------------------------------------------------
 # Miscellaneous
 # -----------------------------------------------------------------------------
 # Automatically set the debug environment (command + working directory) for MSVC
-if(MSVC)
+if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     set_property(TARGET ${CLUSTER_EXPORTER_BIN} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY  $<IF:$<CONFIG:DEBUG>,${ManiVault_INSTALL_DIR}/debug,${ManiVault_INSTALL_DIR}/release>)
     set_property(TARGET ${CLUSTER_EXPORTER_BIN} PROPERTY VS_DEBUGGER_COMMAND $<IF:$<CONFIG:DEBUG>,"${ManiVault_INSTALL_DIR}/debug/ManiVault Studio.exe","${ManiVault_INSTALL_DIR}/release/ManiVault Studio.exe">)
 endif()

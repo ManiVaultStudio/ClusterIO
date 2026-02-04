@@ -116,7 +116,7 @@ class ClusterExporterBinFactory : public WriterPluginFactory
 {
     Q_INTERFACES(mv::plugin::WriterPluginFactory mv::plugin::PluginFactory)
 	Q_OBJECT
-    Q_PLUGIN_METADATA(IID "manivault.studio.ClusterExporterBin" FILE "ClusterExporterBin.json")
+    Q_PLUGIN_METADATA(IID "manivault.studio.ClusterExporterBin" FILE "PluginInfo.json")
 
 public:
 

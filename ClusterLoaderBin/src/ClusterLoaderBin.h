@@ -47,7 +47,7 @@ class ClusterLoaderBinFactory : public LoaderPluginFactory
 {
     Q_INTERFACES(mv::plugin::LoaderPluginFactory mv::plugin::PluginFactory)
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID "manivault.studio.ClusterLoaderBin" FILE "ClusterLoaderBin.json")
+    Q_PLUGIN_METADATA(IID "manivault.studio.ClusterLoaderBin" FILE "PluginInfo.json")
 
 public:
     /** No need for custom constructor */

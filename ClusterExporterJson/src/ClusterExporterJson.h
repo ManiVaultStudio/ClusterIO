@@ -50,7 +50,7 @@ class ClusterExporterJsonFactory : public WriterPluginFactory
 {
     Q_INTERFACES(mv::plugin::WriterPluginFactory mv::plugin::PluginFactory)
 	Q_OBJECT
-    Q_PLUGIN_METADATA(IID "manivault.studio.ClusterExporterJson" FILE "ClusterExporterJson.json")
+    Q_PLUGIN_METADATA(IID "manivault.studio.ClusterExporterJson" FILE "PluginInfo.json")
 
 public:
 
