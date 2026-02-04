@@ -32,7 +32,7 @@ find_package(ManiVault COMPONENTS Core PointData ClusterData CONFIG)
 set(CLUSTER_EXPORTER_JSON_SOURCES
     src/ClusterExporterJson.h
     src/ClusterExporterJson.cpp
-    src/ClusterExporterJson.json
+    PluginInfo.json
 )
 
 source_group(Plugin FILES ${CLUSTER_EXPORTER_JSON_SOURCES})
@@ -79,10 +79,7 @@ add_custom_command(TARGET ${CLUSTER_EXPORTER_JSON} POST_BUILD
         --prefix ${ManiVault_INSTALL_DIR}/$<CONFIGURATION>
 )
 
-set_target_properties(${CLUSTER_EXPORTER_JSON}
-    PROPERTIES
-    FOLDER WriterPlugins
-)
+mv_handle_plugin_config(${CLUSTER_EXPORTER_JSON})
 
 # -----------------------------------------------------------------------------
 # Miscellaneous

@@ -32,7 +32,7 @@ find_package(ManiVault COMPONENTS Core PointData ClusterData CONFIG)
 set(CLUSTERLOADER_SOURCES
     src/ClusterLoaderBin.h
     src/ClusterLoaderBin.cpp
-    src/ClusterLoaderBin.json
+    PluginInfo.json
 )
 
 set(COMMON_SOURCES
@@ -86,6 +86,8 @@ add_custom_command(TARGET ${CLUSTER_LOADER_BIN} POST_BUILD
         --component PLUGIN
         --prefix ${ManiVault_INSTALL_DIR}/$<CONFIGURATION>
 )
+
+mv_handle_plugin_config(${CLUSTER_LOADER_BIN})
 
 # -----------------------------------------------------------------------------
 # Miscellaneous

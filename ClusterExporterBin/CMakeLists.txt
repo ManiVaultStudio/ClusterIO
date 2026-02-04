@@ -32,7 +32,7 @@ find_package(ManiVault COMPONENTS Core PointData ClusterData CONFIG)
 set(CLUSTER_EXPORTER_BIN_SOURCES
     src/ClusterExporterBin.h
     src/ClusterExporterBin.cpp
-    src/ClusterExporterBin.json
+    PluginInfo.json
 )
 
 set(COMMON_SOURCES
@@ -84,6 +84,8 @@ add_custom_command(TARGET ${CLUSTER_EXPORTER_BIN} POST_BUILD
         --component PLUGIN
         --prefix ${ManiVault_INSTALL_DIR}/$<CONFIGURATION>
 )
+
+mv_handle_plugin_config(${CLUSTER_EXPORTER_BIN})
 
 # -----------------------------------------------------------------------------
 # Miscellaneous
