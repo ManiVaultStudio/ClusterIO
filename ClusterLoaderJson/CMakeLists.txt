@@ -4,7 +4,8 @@ cmake_minimum_required(VERSION 3.17)
 # Cluster Loader Plugin
 # -----------------------------------------------------------------------------
 set(CLUSTER_LOADER_JSON "ClusterLoaderJson")
-PROJECT(${CLUSTER_LOADER_JSON})
+PROJECT(${CLUSTER_LOADER_JSON}
+        LANGUAGES CXX)
 
 # -----------------------------------------------------------------------------
 # CMake Options

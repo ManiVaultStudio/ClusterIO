@@ -4,7 +4,8 @@ cmake_minimum_required(VERSION 3.17)
 # Cluster Writer Plugin
 # -----------------------------------------------------------------------------
 set(CLUSTER_EXPORTER_BIN "ClusterExporterBin")
-PROJECT(${CLUSTER_EXPORTER_BIN})
+PROJECT(${CLUSTER_EXPORTER_BIN}
+        LANGUAGES CXX)
 
 # -----------------------------------------------------------------------------
 # CMake Options

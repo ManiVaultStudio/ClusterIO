@@ -4,7 +4,8 @@ cmake_minimum_required(VERSION 3.17)
 # Cluster Writer Plugin
 # -----------------------------------------------------------------------------
 set(CLUSTER_EXPORTER_JSON "ClusterExporterJson")
-PROJECT(${CLUSTER_EXPORTER_JSON})
+PROJECT(${CLUSTER_EXPORTER_JSON}
+        LANGUAGES CXX)
 
 # -----------------------------------------------------------------------------
 # CMake Options

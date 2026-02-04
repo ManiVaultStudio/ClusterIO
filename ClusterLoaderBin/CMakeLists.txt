@@ -4,7 +4,8 @@ cmake_minimum_required(VERSION 3.17)
 # Cluster Loader Plugin
 # -----------------------------------------------------------------------------
 set(CLUSTER_LOADER_BIN "ClusterLoaderBin")
-PROJECT(${CLUSTER_LOADER_BIN})
+PROJECT(${CLUSTER_LOADER_BIN}
+        LANGUAGES CXX)
 
 # -----------------------------------------------------------------------------
 # CMake Options
