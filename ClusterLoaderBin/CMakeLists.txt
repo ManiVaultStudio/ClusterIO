@@ -80,7 +80,6 @@ install(TARGETS ${CLUSTER_LOADER_BIN}
 )
 
 add_custom_command(TARGET ${CLUSTER_LOADER_BIN} POST_BUILD
-    DEPENDS ClusterLoaderBin
     COMMAND "${CMAKE_COMMAND}"
         --install ${CMAKE_CURRENT_BINARY_DIR}
         --config $<CONFIGURATION>
