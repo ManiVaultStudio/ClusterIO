@@ -78,7 +78,6 @@ install(TARGETS ${CLUSTER_EXPORTER_BIN}
 )
 
 add_custom_command(TARGET ${CLUSTER_EXPORTER_BIN} POST_BUILD
-    DEPENDS ClusterExporterBin
     COMMAND "${CMAKE_COMMAND}"
         --install ${CMAKE_CURRENT_BINARY_DIR}
         --config $<CONFIGURATION>

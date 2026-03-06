@@ -80,7 +80,6 @@ install(TARGETS ${CLUSTER_LOADER_JSON}
 )
 
 add_custom_command(TARGET ${CLUSTER_LOADER_JSON} POST_BUILD
-    DEPENDS ClusterLoaderJson
     COMMAND "${CMAKE_COMMAND}"
         --install ${CMAKE_CURRENT_BINARY_DIR}
         --config $<CONFIGURATION>

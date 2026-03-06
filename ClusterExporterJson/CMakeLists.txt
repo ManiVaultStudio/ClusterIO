@@ -72,7 +72,6 @@ install(TARGETS ${CLUSTER_EXPORTER_JSON}
 )
 
 add_custom_command(TARGET ${CLUSTER_EXPORTER_JSON} POST_BUILD
-    DEPENDS ClusterExporterJson
     COMMAND "${CMAKE_COMMAND}"
         --install ${CMAKE_CURRENT_BINARY_DIR}
         --config $<CONFIGURATION>
