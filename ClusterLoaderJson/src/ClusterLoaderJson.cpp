@@ -77,7 +77,7 @@ void ClusterLoaderJson::loadData()
         if (!sourcePointsDatasetMap.contains("NumberOfPoints"))
             throw std::runtime_error("<b>SourcePointsDataset/NumberOfPoints</b> not found in JSON document");
         
-        const auto numberOfPoints = sourcePointsDatasetMap["NumberOfPoints"].toInt();
+        const auto numberOfPoints = static_cast<uint64_t>(sourcePointsDatasetMap["NumberOfPoints"].toULongLong());
 
         if (numberOfPoints != Dataset<Points>(inputDialog.getSourceDataset())->getNumPoints())
             throw std::runtime_error("Number of points in JSON document does not match the selected dataset");
