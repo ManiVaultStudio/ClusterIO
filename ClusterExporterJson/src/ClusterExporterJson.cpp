@@ -74,7 +74,7 @@ void ClusterExporterJson::writeData()
     		throw std::runtime_error("Unable to open file for writing");
 
         const auto sourcePointsDatasetMap = QVariantMap({
-            { "NumberOfPoints", sourcePointsDataset->getNumPoints() }
+            { "NumberOfPoints", QVariant::fromValue<qulonglong>(sourcePointsDataset->getNumPoints()) }
         });
 
     	const auto jsonDocument = QJsonDocument::fromVariant(QVariantMap({
