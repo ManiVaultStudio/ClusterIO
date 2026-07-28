@@ -6,14 +6,6 @@ import shutil
 import pathlib
 import subprocess
 from rules_support import PluginBranchInfo
-import re
-
-def compatibility(os, compiler, compiler_version):
-    # On macos fallback to zlib apple-clang 13
-    if os == "Macos" and compiler == "apple-clang" and bool(re.match("14.*", compiler_version)):  
-        print("Compatibility match")
-        return ["zlib/1.3:compiler.version=13"]
-    return None
 
 class ClusterIOPluginConan(ConanFile):
     """Class to package ClusterIOPlugin using conan
@@ -106,8 +98,9 @@ class ClusterIOPluginConan(ConanFile):
         tc.variables["ManiVault_DIR"] = manivault_dir
 
         # Set some build options
-        tc.variables["MV_UNITY_BUILD"] = "ON"
-        
+        tc.cache_variables["MV_UNITY_BUILD"] = "ON"
+        tc.cache_variables["CMAKE_CONFIGURATION_TYPES"] = "RelWithDebInfo"
+
         tc.generate()
 
     def _configure_cmake(self):
@@ -121,7 +114,6 @@ class ClusterIOPluginConan(ConanFile):
 
         cmake = self._configure_cmake()
         cmake.build(build_type="RelWithDebInfo")
-        cmake.build(build_type="Release")
 
     def package(self):
         package_dir = pathlib.Path(self.build_folder, "package")
@@ -139,23 +131,9 @@ class ClusterIOPluginConan(ConanFile):
                 relWithDebInfo_dir,
             ]
         )
-        subprocess.run(
-            [
-                "cmake",
-                "--install",
-                self.build_folder,
-                "--config",
-                "Release",
-                "--prefix",
-                release_dir,
-            ]
-        )
         self.copy(pattern="*", src=package_dir)
 
     def package_info(self):
         self.cpp_info.relwithdebinfo.libdirs = ["RelWithDebInfo/lib"]
         self.cpp_info.relwithdebinfo.bindirs = ["RelWithDebInfo/Plugins", "RelWithDebInfo"]
         self.cpp_info.relwithdebinfo.includedirs = ["RelWithDebInfo/include", "RelWithDebInfo"]
-        self.cpp_info.release.libdirs = ["Release/lib"]
-        self.cpp_info.release.bindirs = ["Release/Plugins", "Release"]
-        self.cpp_info.release.includedirs = ["Release/include", "Release"]
