@@ -64,7 +64,7 @@ void ClusterExporterBin::writeData()
         else
         {
             // store the directory name
-            settings.setValue(directoryPathKey, QFileInfo(fileName).absolutePath());
+            setSetting(registryEntry, QFileInfo(fileName).absolutePath());
 
             // get data from core
             utils::DataContent dataContent = retrieveDataSetContent(inputDataset);
